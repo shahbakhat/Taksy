@@ -1,41 +1,41 @@
 <!doctype html>
 <html lang="en">
-   {% block head %}
-   <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <link rel="stylesheet" type="text/css" href="href="./styles.css"" />
-      <title>{% block title %}{% endblock %}</title>
-      {% load bootstrap5 %}
-      {% bootstrap_css %}
-      {% bootstrap_javascript %}
-   </head>
-   {% endblock %}
-   <body>
-      {% if not request.user.is_authenticated %}
-      <nav id="navbar-container" class="navbar navbar-light navbar-expand-lg bg-warning" >
-         <a class="navbar-brand ms-5" id="nav-logo" href="'/'">TaxiPal</a>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+    {% load bootstrap5 %} {% bootstrap_css %} {% bootstrap_javascript %}
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+      <nav id="navbar-container"  class="navbar navbar-light{% if not request.user.is_authenticated %} navbar-expand-lg {% endif %} bg-warning">
+        <a class="navbar-brand ms-5" id="nav-logo" href="/">TaxiPal</a>
+        {% if not request.user.is_authenticated %}
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
          <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav">
-               <li class="nav-item">
-                  <a class="nav-link active" aria-current="page" href="/passenger">Passenger</a>
-               </li>
-               <li class="nav-item">
-                  <a class="nav-link" href="/driver">Driver</a>
-               </li>
+                <li class="nav-item {% if request.GET.next != '/driver/' %}active{% endif %}">
+                    <a class="nav-link active " aria-current="page" href="/passenger/">Passenger</a>
+                </li>
+                <li class="nav-item {% if request.GET.next == '/driver/' %}active{% endif %}">
+                    <a class="nav-link active " aria-current="page" href="/driver/">Driver</a>
+                </li>
             </ul>
-         </div>
-         </div>
-         {% else %}
-         <form action="form-inline">
-            <span class="mr-4">{{ request.user.get_full_name|title }}</span>
-            <a href="/logout" class="btn btn-outline-dark">Logout</a>
+        </div>
+   {% else %}
+         <form action="form-inline"><span class="mr-4">{{ request.user.get_full_name|title }}</span>
+            <a href="/logout" class="btn btn-outline-dark ">Logout</a>
          </form>
-         {% endif %}
+   {% endif %}
       </nav>
-      {% block content %}{% endblock %}
-      <footer class="mt-5 mb-5 text-center ">
-         &copy;Taximate.ie
-      </footer>
-   </body>
+
+   {% block content %}{% endblock %}
+    <footer class="mt-5 mb-5 text-center "> &copy;Taxipal.ie </footer>
+</body>
+
 </html>
