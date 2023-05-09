@@ -9,3 +9,7 @@ def passenger_page(request):
 
 def driver_page(request):
     return render (request, 'driver.html')
+def login(request):
+    return render (request, 'login.html')
+def login(request):
+    return render (request, 'logout.html')
