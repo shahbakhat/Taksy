@@ -11,16 +11,13 @@
 </head>
 
 <body>
-      <nav id="navbar-container"  class="navbar navbar-light{% if not request.user.is_authenticated %} navbar-expand-lg {% endif %} bg-warning">
+      <nav id="navbar-container"  class="navbar  navbar-light{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %}{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %} bg-warning">
         <a class="navbar-brand ms-5" id="nav-logo" href="/">Taxi Pal</a>
         {% if not request.user.is_authenticated %}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-        </button>
-   {% else %}
+        {% else %}
          <form action="form-inline">
-            <span class="mr-8">{{ request.user.get_full_name|title }}</span>
-            <a href="/logout" class="btn btn-outline-dark ">Logout</a>
+            <span class="me-4">{{ request.user.get_full_name|title }}</span>
+            <a href="/logout" class="btn me-4 btn-dark">Logout</a>
          </form>
    {% endif %}
       </nav>
