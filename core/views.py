@@ -7,7 +7,10 @@ def home(request):
 
 @login_required()
 def passenger_page(request):
-    return render (request, 'passenger.html')
+    return render (request, 'home.html')
 @login_required()
 def driver_page(request):
-    return render (request, 'driver.html')
+    return render (request, 'home.html')
+
+def sign_up(request):
+    return render (request, 'sign-up.html')

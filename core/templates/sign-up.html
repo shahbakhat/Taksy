@@ -16,13 +16,10 @@
                 </h4>
                 <form method="POST" >
                    {% csrf_token %}
-                   {% bootstrap_form_errors form %}
-                   {% bootstrap_label "Email" %}
-                   {% bootstrap_field form.username show_label=False placeholder="Email" %}
-                   {% bootstrap_field form.password %}
-                   <button class="btn btn-warning btn-block" type="submit" type="button">Log in</button>
-                   <p class="text-center mt-3">New to TaxiPal?
-                    <a href="/login/?next={{request.GET.next}}"><b>Sign Up</b></a>
+                   {% bootstrap_form_ form %}
+                   <button class="btn btn-warning btn-block" type="submit" >Sign Up</button>
+                   <p class="text-center mt-3">Already have an account?
+                    <a href="/sign-up/?next={{request.GET.next}}"></a>
                    </p>
                 </form>
              </div>
