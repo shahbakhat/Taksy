@@ -9,7 +9,7 @@
              <div class="card-body">
                 <h4 class="text-center text-uppercase mb-3">
                      {% if  not request.GET.next == '/driver/' %}
-                    <b>Passenger</b>
+                    <b>passenger</b>
                      {% else %}
                      <b>driver</b>
                      {% endif %}
@@ -22,7 +22,7 @@
                    {% bootstrap_field form.password %}
                    <button class="btn btn-warning btn-block" type="submit" type="button">Log in</button>
                    <p class="text-center mt-3">New to TaxiPal?
-                    <a href="/login/?next={{request.GET.next}}"><b>Sign Up</b></a>
+                    <a href="/sign-up/?next={{request.GET.next}}"><b>Sign Up</b></a>
                    </p>
                 </form>
              </div>

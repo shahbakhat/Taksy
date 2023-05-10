@@ -15,4 +15,5 @@ def driver_page(request):
 
 def sign_up(request):
     form = forms.SignUpForm()
-    return render (request, 'sign-up.html')
+    return render (request, 'sign-up.html' ,{'form':form
+    })

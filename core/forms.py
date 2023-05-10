@@ -11,7 +11,7 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = User
-    fields = ('emial', 'first_name', 'last_name', 'password1', 'password2')
+        fields = ('email', 'first_name', 'last_name', 'password1', 'password2')
     # Funcion to return clean data in form if dictionary
     # String and primary keys will be returned asobjects
     def clean_field(self):
