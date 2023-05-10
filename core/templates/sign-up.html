@@ -18,7 +18,9 @@
                 <form method="POST" >
                   {% csrf_token %}
                   {% bootstrap_form form %}
+                  <div class="d-grid gap-2">
                    <button class="btn btn-warning btn-block" type="submit" >Sign Up</button>
+                  </div>
                    <p class="text-center mt-3">Already have an account?
                     <a href="/login/?next={{request.GET.next}}">Log In</a>
                    </p>
