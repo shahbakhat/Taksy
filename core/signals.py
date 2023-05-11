@@ -11,12 +11,16 @@ def send_welcome_email(sender, instance, created, **kwargs):
     if created and instance.email:
         # Send welcome email
         body = render_to_string(
-            'welcome_email_template.html'
+            'welcome_email_template.html',
+
+            {
+                'name' : instance.get_full_name(),
+            }
         )
         send_mail(
             "Welcome to Taxi Pal",
             body,
             settings.DEFAULT_FROM_EMAIL,
-            ["instance.email"],
+            [instance.email],
             fail_silently=False,
         )

@@ -23,11 +23,12 @@ def sign_up(request):
         if form.is_valid():
             email = form.cleaned_data['email'].lower()
 
-            user = form.save(commit=False)
+            user =form.save(commit=False)
             user.username = email
             user.save()
 
-            login(request, user)
+
+            login(request,user)
             return redirect('/')
 
     return render(request, 'sign-up.html', {'form': form
