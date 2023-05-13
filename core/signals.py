@@ -10,17 +10,14 @@ from django.template.loader import render_to_string
 def send_welcome_email(sender, instance, created, **kwargs):
     if created and instance.email:
         # Send welcome email
-        body = render_to_string(
+        body =render_to_string(
             'welcome_email_template.html',
-
-            {
-                'name' : instance.get_full_name(),
-            }
+            {'name': instance.get_full_name()}
         )
         send_mail(
-            "Welcome to Taxi Pal",
+            'Welcome to Taxi Pal',
             body,
             settings.DEFAULT_FROM_EMAIL,
             [instance.email],
-            fail_silently=False,
+            fail_silently= False,
         )

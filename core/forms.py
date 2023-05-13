@@ -14,11 +14,11 @@ class SignUpForm(UserCreationForm):
         fields = ('email', 'first_name', 'last_name', 'password1', 'password2')
     # Funcion to return clean data in form if dictionary
     # String and primary keys will be returned asobjects
-    def clean_field(self):
-        data = self.cleaned_data('email').lowercase()
-        if User.objects.filter(email=data).exists:
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        if User.objects.filter(email=email):
             raise ValidationError("The email address already exists")
-        return data.cleaned_data('email')
+        return email
 
 
 
