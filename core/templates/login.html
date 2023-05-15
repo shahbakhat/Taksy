@@ -7,12 +7,12 @@
        <div class="col-lg-4">
           <div class="card">
              <div class="card-body">
-                {% if  not request.GET.next == '/driver/' %}
+                {% if request.GET.next == '/driver/' %}
                 <h4 class="text-center text-uppercase mb-3">
-                    <b>passenger</b>
+                    <b>driver</b>
                      {% else %}
                 <h4 class="text-center text-uppercase mb-3">
-                     <b>driver</b>
+                     <b>passenger</b>
                      {% endif %}
                 </h4>
                 <form method="POST" >
