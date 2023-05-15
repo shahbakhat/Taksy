@@ -9,7 +9,8 @@ from core.driver import  views as driver_views
 
 
 passenger_urlpatterns = [
-    path('',passenger_views.home, name="home")
+    path('',passenger_views.home, name="home"),
+    path('profile/',passenger_views.profile_page, name="profile"),
 ]
 
 driver_urlpatterns = [

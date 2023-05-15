@@ -1,0 +1,16 @@
+{% extends 'passenger/base.html' %}
+{% load bootstrap5 %}
+
+{% block main %}
+
+<b class="btext-secondary">Basic Information</b>
+<div class="card bg-white mt-2 mb5">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            {% bootstrap_from user_form%}
+            <input type="hidden" name="action" value="update_profile">
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</div>
