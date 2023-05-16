@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from . import forms
 # Create your views here.
 
-
 def home(request):
     return render(request, 'home.html')
 

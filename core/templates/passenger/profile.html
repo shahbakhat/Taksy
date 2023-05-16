@@ -6,9 +6,10 @@
 <b class="btext-secondary">Basic Information</b>
 <div class="card bg-white mt-2 mb-5">
     <div class="card-body">
-        <form method="POST" >
+        <form method="post" enctype="multipart/form-data" >
             {% csrf_token %}
             {% bootstrap_form  user_form %}
+            {% bootstrap_form  passenger_form %}
             <input type="hidden" name="action" value="update_profile">
             <button type="submit" class="btn btn-warning">Save</button>
         </form>
