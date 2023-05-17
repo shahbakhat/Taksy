@@ -20,7 +20,7 @@ def profile_page(request):
 
     if request.method == "POST":
 
-        if request.POST.get('action') == 'update_prfile':
+        if request.POST.get('action') == 'update_profile':
             user_form = forms.BasicUserForm(
                 request.POST, instance=request.user)
             passenger_form = forms.BasicCustomerForm(
@@ -31,7 +31,6 @@ def profile_page(request):
                 passenger_form.save()
 
             # Profile update toast
-                messages.success(request, 'Your profile has been updated')
                 return redirect(reverse('passenger:profile'))
 
         elif request.POST.get('action') == 'update_password':
@@ -40,7 +39,6 @@ def profile_page(request):
                 user = password_form.save()
                 update_session_auth_hash(request, user)
 
-                messages.success(request, 'Your password has been updated')
                 return redirect(reverse('passenger:profile'))
 
     return render(request, 'passenger/profile.html',
