@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'jquery',
     'crispy_forms',
     'core.apps.CoreConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+
             ],
         },
     },

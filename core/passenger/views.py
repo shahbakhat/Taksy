@@ -31,6 +31,7 @@ def profile_page(request):
                 passenger_form.save()
 
             # Profile update toast
+                messages.success(request, 'profile updated successfully.')
                 return redirect(reverse('passenger:profile'))
 
         elif request.POST.get('action') == 'update_password':
@@ -39,6 +40,8 @@ def profile_page(request):
                 user = password_form.save()
                 update_session_auth_hash(request, user)
 
+
+                messages.success(request, 'password updated successfully.')
                 return redirect(reverse('passenger:profile'))
 
     return render(request, 'passenger/profile.html',
