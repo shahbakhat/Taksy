@@ -50,7 +50,7 @@
     </div>
 
 <script>
-   var stripe = Stripe("{{ STRIPE_API_PUBLIC_KEY }}");
+    var stripe = Stripe("{{ STRIPE_API_PUBLIC_KEY }}");
     var elements = stripe.elements();
     var cardElements = elements.create('card')
     cardElements.mount('#card-element')
