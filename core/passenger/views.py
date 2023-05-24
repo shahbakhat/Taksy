@@ -5,6 +5,10 @@ from core.passenger import forms
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.conf import settings
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @login_required(login_url="/login/?next=/passenger/")
@@ -18,21 +22,22 @@ def profile_page(request):
     passenger_form = forms.BasicCustomerForm(instance=request.user.passenger)
     password_form = PasswordChangeForm(request.user)
 
-    if request.method == "POST":
+    if (
+        request.method == "POST"
+        and request.POST.get('action') == 'update_profile'
+    ):
+        user_form = forms.BasicUserForm(
+            request.POST, instance=request.user)
+        passenger_form = forms.BasicCustomerForm(
+            request.POST, request.FILES, instance=request.user.passenger)
 
-        if request.POST.get('action') == 'update_profile':
-            user_form = forms.BasicUserForm(
-                request.POST, instance=request.user)
-            passenger_form = forms.BasicCustomerForm(
-                request.POST, request.FILES, instance=request.user.passenger)
-
-            if user_form.is_valid() and passenger_form.is_valid():
-                user_form.save()
-                passenger_form.save()
+        if user_form.is_valid() and passenger_form.is_valid():
+            user_form.save()
+            passenger_form.save()
 
             # Profile update toast
-                messages.success(request, 'profile updated successfully.')
-                return redirect(reverse('passenger:profile'))
+            messages.success(request, 'profile updated successfully.')
+            return redirect(reverse('passenger:profile'))
 
         elif request.POST.get('action') == 'update_password':
             password_form = PasswordChangeForm(request.user, request.POST)
@@ -49,4 +54,27 @@ def profile_page(request):
                    "passenger_form": passenger_form,
                    "password_form": password_form,
                    }
+                  )
+
+@login_required(login_url="/login/?next=/passenger/payment-method")
+def payment_method_page(request):
+    current_customer = request.user.passenger
+    #saving the payment method
+    if not current_customer.stripe_customer_id:
+        customer = stripe.Customer.create()
+        current_customer.stripe_customer_id = customer['id']
+        current_customer.save()
+# Get stripe payment method
+    # Stripe intent
+    intent = stripe.SetupIntent.create(
+        customer = current_customer.stripe_customer_id,
+    )
+
+
+
+    return render(request, 'passenger/payment-method.html',
+                  {
+                    "client_secret":intent.client_secret,
+                    "STRIPE_API_PUBLIC_KEY":settings.STRIPE_API_PUBLIC_KEY,
+                  }
                   )

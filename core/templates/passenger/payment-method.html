@@ -1,0 +1,58 @@
+{% extends 'passenger/base.html' %}
+{% load bootstrap5 %}
+
+{% block head %}
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+    #setup-form{
+        padding:2rem;
+    }
+    .StripeElement {
+        height:40px;
+        padding:10px 12px;
+        width:100%;
+        background-color=white;
+        border :1px solid #ced4da;
+        {% comment %} border:1px solid transparent; {% endcomment %}
+        border-radius:4px;
+
+        {% comment %} box-shadow: 01px 3px 0 #e6ebf1;
+        -webkit-trnsition: box-shadow 150ms ease;
+        transition: box-shadow 150ms ease; {% endcomment %}
+    }
+    .StripeElement--focus {
+        border-color:#80bdff;
+        box-shadow:0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    .StripeElement--invalid{
+        border-color: #fa755a;
+    }
+    .StripeElement--webkit-autofil {
+        background-color:#fefde5 !important;
+    }
+</style>
+
+{% endblock %}
+{% block main %}
+
+<b class="text-secomdary">Your Credit/Debit Card</b>
+    <div class="card bg-white ">
+        <form id="setup-form">
+            <div id="card-element">
+              <!-- Elements will create form elements here -->
+            </div>
+            <button id="card-button" class="btn btn-warning mt-3">Save Card</button>
+            <div id="error-message">
+              <!-- Display error message to your customers here -->
+            </div>
+          </form>
+        </div>
+    </div>
+
+<script>
+   var stripe = Stripe("{{ STRIPE_API_PUBLIC_KEY }}");
+    var elements = stripe.elements();
+    var cardElements = elements.create('card')
+    cardElements.mount('#card-element')
+</script>
+{% endblock %}
