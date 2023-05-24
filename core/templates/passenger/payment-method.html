@@ -67,14 +67,7 @@
                     card: cardElement,
                 },
             }
-        ).then(function(result) {
-            if (result.error){
-                toast(result.error.message, 'error');
-            }else {
-                toast("Payment method is added, 'success')
-                window.location.reload();
-            }
-        });
+        )
     });
 </script>
 {% endblock %}
