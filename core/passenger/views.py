@@ -22,14 +22,13 @@ def profile_page(request):
     passenger_form = forms.BasicCustomerForm(instance=request.user.passenger)
     password_form = PasswordChangeForm(request.user)
 
-    if (
-        request.method == "POST"
-        and request.POST.get('action') == 'update_profile'
-    ):
-        user_form = forms.BasicUserForm(
-            request.POST, instance=request.user)
-        passenger_form = forms.BasicCustomerForm(
-            request.POST, request.FILES, instance=request.user.passenger)
+    if request.method == "POST":
+        if request.POST.get('action') == 'update_profile':
+
+            user_form = forms.BasicUserForm(
+                request.POST, instance=request.user)
+            passenger_form = forms.BasicCustomerForm(
+                request.POST, request.FILES, instance=request.user.passenger)
 
         if user_form.is_valid() and passenger_form.is_valid():
             user_form.save()
@@ -65,9 +64,25 @@ def payment_method_page(request):
         current_customer.stripe_customer_id = customer['id']
         current_customer.save()
 # Get stripe payment method
+    stripe_payment_methods = stripe.PaymentMethod.list(
+        customer  = current_customer.stripe_customer_id,
+        type = "card",)
+
+    print(stripe_payment_methods)
+
+    #Saving lats 4 digits of customer card
+    if stripe_payment_methods and len(stripe_payment_methods.data) > 0 :
+        payment_method = stripe_payment_methods.data[0]
+        current_customer.stripe_payment_method_id = payment_method.id
+        current_customer.stripe_card_last4 = payment_method.card.last4
+        current_customer.save()
+    else:
+        current_customer.stripe_payment_method_id = ""
+        current_customer.stripe_card_last4 = ""
+
     # Stripe intent
     intent = stripe.SetupIntent.create(
-        customer = current_customer.stripe_customer_id,
+        customer = current_customer.stripe_customer_id
     )
 
 

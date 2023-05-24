@@ -9,7 +9,7 @@ from . import forms
 def home(request):
     return render(request, 'home.html')
 
-def sign_up(request):
+def sign_up(request):  # sourcery skip: extract-method
     form = forms.SignUpForm()
 
     if request.method == "POST":
