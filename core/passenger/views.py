@@ -57,39 +57,46 @@ def profile_page(request):
 
 @login_required(login_url="/login/?next=/passenger/payment-method")
 def payment_method_page(request):
-    current_customer = request.user.passenger
-    #saving the payment method
-    if not current_customer.stripe_customer_id:
-        customer = stripe.Customer.create()
-        current_customer.stripe_customer_id = customer['id']
-        current_customer.save()
-# Get stripe payment method
-    stripe_payment_methods = stripe.PaymentMethod.list(
-        customer  = current_customer.stripe_customer_id,
-        type = "card",)
+#     current_customer = request.user.passenger
+#     #saving the payment method
+#     if not current_customer.stripe_customer_id:
+#         customer = stripe.Customer.create()
+#         current_customer.stripe_customer_id = customer['id']
+#         current_customer.save()
+# # Get stripe payment method
+#     stripe_payment_methods = stripe.PaymentMethod.list(
+#         customer  = current_customer.stripe_customer_id,
+#         type = "card",)
 
-    print(stripe_payment_methods)
+#     print(stripe_payment_methods)
 
-    #Saving lats 4 digits of customer card
-    if stripe_payment_methods and len(stripe_payment_methods.data) > 0 :
-        payment_method = stripe_payment_methods.data[0]
-        current_customer.stripe_payment_method_id = payment_method.id
-        current_customer.stripe_card_last4 = payment_method.card.last4
-        current_customer.save()
-    else:
-        current_customer.stripe_payment_method_id = ""
-        current_customer.stripe_card_last4 = ""
+#     #Saving lats 4 digits of customer card
+#     if stripe_payment_methods and len(stripe_payment_methods.data) > 0 :
+#         payment_method = stripe_payment_methods.data[0]
+#         current_customer.stripe_payment_method_id = payment_method.id
+#         current_customer.stripe_card_last4 = payment_method.card.last4
+#         current_customer.save()
+#     else:
+#         current_customer.stripe_payment_method_id = ""
+#         current_customer.stripe_card_last4 = ""
 
-    # Stripe intent
-    intent = stripe.SetupIntent.create(
-        customer = current_customer.stripe_customer_id
-    )
+#     # Stripe intent
+#     intent = stripe.SetupIntent.create(
+#         customer = current_customer.stripe_customer_id
+#     )
 
 
 
-    return render(request, 'passenger/payment-method.html',
-                  {
-                    "client_secret":intent.client_secret,
-                    "STRIPE_API_PUBLIC_KEY":settings.STRIPE_API_PUBLIC_KEY,
-                  }
-                  )
+ return render(request, 'passenger/payment-method.html',)
+#                   {
+#                     "client_secret":intent.client_secret,
+#                     "STRIPE_API_PUBLIC_KEY":settings.STRIPE_API_PUBLIC_KEY,
+#                   }
+#                   )
+
+@login_required(login_url="/login/?next=/passenger/")
+def book_taxi_page(request):
+    # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
+    # if not request.user.customer.stripe_payment_method_id:
+    #     return redirect(reverse('passenger:payment_method'))
+    return render(request, 'passenger/book-taxi.html')
