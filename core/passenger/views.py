@@ -96,7 +96,6 @@ def payment_method_page(request):
 
 @login_required(login_url="/login/?next=/passenger/")
 def book_taxi_page(request):
+    return redirect(reverse('passenger:book-taxi'))
     # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
     # if not request.user.customer.stripe_payment_method_id:
-    #     return redirect(reverse('passenger:payment_method'))
-    return render(request, 'passenger/book-taxi.html')

@@ -2,6 +2,11 @@
 {% include 'messages.html' %}
 
 {% load static %}
+{% comment %} Path variable aliases {% endcomment %}
+{% url 'passenger:bookt-taxi as book_taxi_url ' %}
+{% url 'passenger:my-bookings as my_bookings_url ' %}
+{% url 'passenger:pfrofile as profile_url ' %}
+{% url 'passenger:payment-method as payment_method_url ' %}
 {% block head %}{% endblock %}
 
 {% block content %}
@@ -14,21 +19,21 @@
             <h4>{{ request.user.get_full_name }}</h4>
             <p>{{ request.user.email }}</p>
            </div>
-           <ul class="list-group">
-            <li class="list-group-item">Book a Taxi</li>
-            <li class="list-group-item">My Bookings</li>
-            <li class="list-group-item">Profile Information</li>
-            <li class="list-group-item">Payments Details</li>
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Successful</strong> {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-            {% endif %}
-            </ul>
 
+           <div class="list-group mt-5">
+                    <a href="{% url 'passenger:book-taxi' %}" class="list-group-item list-group-item-action {% if request.path == 'passenger:book_taxi_url'%} active {% endif %}"  >Book a Taxi</a>
+                    <a href=""  class="list-group-item list-group-item-action">My Bookings</a>
+                    <a href="{% url 'passenger:profile' %}" class="list-group-item list-group-item-action">Profile Information</a>
+                    <a href="{% url 'passenger:payment-method' %}" class="list-group-item list-group-item-action">Payments Details</a>
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Successful</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
         </div>
 
         <div class="col-lg-8 mt-3">
