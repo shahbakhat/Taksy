@@ -12,9 +12,7 @@
             {% csrf_token %}
             {% bootstrap_form  user_form %}
             {% bootstrap_form  passenger_form %}
-            <select class="selectpicker countrypicker" data-flag="true" data-default = "IE"></select>
             <input type="hidden" name="action" value="update_profile">
-            <hr style= "visibility: hidden">
             <button type="submit" id="liveAlertBtn"  class="btn btn-warning">Save</button>
         </form>
     </div>
