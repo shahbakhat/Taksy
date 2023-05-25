@@ -1,28 +1,108 @@
 {% extends 'passenger/base.html' %}
+{% load bootstrap5 %}
+{% block head %}
+
+<style>
+    #myTab button {
+        color: black;
+    }
+    #myTab button:hover {
+        color:#f0ad4e;
+        text-decoration: none !important
+    }
+    #myTab button.active {
+        color:#f0ad4e;
+    }
+
+</style>
+{% endblock %}
 
 {% block content %}
-
 <div class="container mt-4">
     <div class="row">
-        <!--LEFT SIDE-->
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    TRIP SUMMARY
-                </div>
-                <div class="card-body">
-                    <p> A summary of your trip will appear here.</p>
-                </div>
-            </div>
+      <!--LEFT SIDE-->
+      <div class="col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-header">
+            TRIP SUMMARY
+          </div>
+          <div class="card-body">
+            <p> A summary of your trip will appear here.</p>
+          </div>
         </div>
-        <!--RIGHT SIDE-->
+      </div>
+      <!--RIGHT SIDE-->
+      <div class="col-lg-8">
+        <!-- STEP TABS -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <ul class="nav nav-tabs nsv-justified align-items-center mb3" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" a
+                ria-controls="details-tab-pane" aria-selected="true">Trip Details</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pickup-tab" data-bs-toggle="tab" data-bs-target="#pickup-tab-pane" type="button" role="tab" 
+                aria-controls="pickup-tab-pane" aria-selected="false">Pickup Address</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="destination-tab" data-bs-toggle="tab" data-bs-target="#destination-tab-pane" type="button" role="tab" 
+                aria-controls="destination-tab-pane" aria-selected="false">Destination</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment-tab-pane" type="button" role="tab" 
+                aria-controls="payment-tab-pane" aria-selected="false">Payment</button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <!-- STEP FORMs-->
+
         <div class="col-lg-8">
-            <div class="card mb-5">
-            <div class="card-body"></div>
+          <div class="card ">
+            <div class="card-body">
+              <b class="fw-normal"> Book a Taxi</b>
+              <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+                  <h3>
+                    Trip Details
+                    <i class="fa-solid ms-3 fa-lg fa-circle-info"></i>
+                  </h3>
+                  <hr class="border border-warning border-3 opacity-100">
+                </div>
+                <div class="tab-pane fade" id="pickup-tab-pane" role="tabpanel" aria-labelledby="pickup-tab" tabindex="0">
+                  <h3>
+                    Where are you?
+                    <i class="fa-solid ms-3 fa-lg fa-location-crosshairs"></i>
+                  </h3>
+                  <hr class="border border-warning border-3 opacity-100">
+                  <p>
+                    Type your address here:
+                  </p>
+                </div>
+                <div class="tab-pane fade" id="destination-tab-pane" role="tabpanel" aria-labelledby="destination-tab" tabindex="0">
+                  <h3>Where would you like to go?
+                    <i class="fa-regular ms-3 fa-lg fa-map"></i>
+                  </h3>
+                  <hr class="border border-warning border-3 opacity-100">
+                  <p>
+                    Type your destination address here:
+                  </p>
+                </div>
+                <div class="tab-pane fade" id="payment-tab-pane" role="tabpanel" aria-labelledby="payment-tab" tabindex="0">
+                  <h3>How do you want to pay?
+                    <i class="fa-solid ms-3 fa-lg fa-money-bill-1"></i>
+                  </h3>
+                  <hr class="border border-warning border-3 opacity-100">
+                  <p>
+                    Choose your payment method:
+                  </p>
+                </div>
+              </div>
             </div>
-
+          </div>
         </div>
+      </div>
     </div>
-</div>
-
+  </div>
 {% endblock %}

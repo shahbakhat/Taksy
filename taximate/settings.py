@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     'jquery',
     'crispy_forms',
     'core.apps.CoreConfig',
+    'fontawesomefree',
+  ]
 
-]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -15,7 +15,8 @@ passenger_urlpatterns = [
     path('',passenger_views.home, name="home"),
     path('profile/',passenger_views.profile_page, name="profile"),
     path('payment-method/',passenger_views.payment_method_page, name="payment-method"),
-    path('book-a-taxi/',passenger_views.book_taxi_page, name="book-a-taxi")
+    path('book-a-taxi/',passenger_views.book_taxi_page, name="book-a-taxi"),
+    path('my-trips/',passenger_views.my_trips_page, name="my-trips"),
 ]
 
 driver_urlpatterns = [

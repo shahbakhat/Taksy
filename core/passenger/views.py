@@ -101,8 +101,8 @@ def book_taxi_page(request):
      return render(request, 'passenger/book-a-taxi.html',)
     # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
     # if not request.user.customer.stripe_payment_method_id:
-    
+
 #  PASSENGER TRIPS
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
-    return redirect(reverse('passenger:my-trips'))
+    return render(request, 'passenger/my-trips.html',)
