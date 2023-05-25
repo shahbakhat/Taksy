@@ -15,7 +15,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def home(request):
     return redirect(reverse('passenger:profile'))
 
-
+#  PROFILE PAGE
 @login_required(login_url="/login/?next=/passenger/")
 def profile_page(request):
     user_form = forms.BasicUserForm(instance=request.user)
@@ -55,6 +55,7 @@ def profile_page(request):
                    }
                   )
 
+# PAYMENT METHODS
 @login_required(login_url="/login/?next=/passenger/payment-method")
 def payment_method_page(request):
 #     current_customer = request.user.passenger
@@ -94,8 +95,14 @@ def payment_method_page(request):
 #                   }
 #                   )
 
-@login_required(login_url="/login/?next=/passenger/")
+# BOOKING TAXI
+@login_required(login_url="/login/?next=/passenger/book-a-taxi")
 def book_taxi_page(request):
-    return redirect(reverse('passenger:book-taxi'))
+     return render(request, 'passenger/book-a-taxi.html',)
     # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
     # if not request.user.customer.stripe_payment_method_id:
+    
+#  PASSENGER TRIPS
+@login_required(login_url="/login/?next=/passenger/")
+def my_trips_page(request):
+    return redirect(reverse('passenger:my-trips'))
