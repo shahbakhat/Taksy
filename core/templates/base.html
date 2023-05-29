@@ -19,7 +19,7 @@
         {% else %}
          <form action="form-inline">
             <img src="{% if request.user.passenger.profile_photo %}{{ request.user.passenger.profile_photo.url }}{% else %}{% static 'images/avatar.png'%}{% endif %}" class="rounded-circle me-2" alt="avatar-image" width="50" height="50">
-            <span class="me-4 fw-bold ">{{ request.user.get_full_name|title }}</span>
+            <a class="me-4 fw-bold " style="text-decoration:none; color:black;" href="{% url 'passenger:profile'%}">{{ request.user.get_full_name|title }}</a>
             <a href="/logout/" class=" btn me-4 btn-dark">Logout</a>
          </form>
    {% endif %}
