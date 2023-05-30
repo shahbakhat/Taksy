@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
+from django.conf import settings
+from django.db.models import Sum
+from django.shortcuts import reverse
 from django.utils import timezone
 
 
@@ -15,9 +18,10 @@ class Passenger(models.Model):
     def __str__(self):
         return self.user.get_full_name()
 
-# Taxi category models
-class TaxiCategory(models.Model):
-    slug = models.CharField(max_length=225, unique=True)
+# Taxi models
+class Taxi (models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
     FIVE_SEATER = "5 Seater"
     SEVEN_SEATER = "7 Seater"
     EIGHT_SEATER = "7 Seater"
@@ -25,36 +29,48 @@ class TaxiCategory(models.Model):
         (FIVE_SEATER ,'5 Seater'),
         (SEVEN_SEATER ,' 7 Seater'),
         (EIGHT_SEATER ,' 8 Seater'),
-        )
-    name  = models.CharField(max_length=20, choices= TAXI_SIZE,default= FIVE_SEATER)
-
+    )
     def __str__(self):
-        return self.name
+            return self.title
+
+    def get_absolute_url(self):
+        return reverse("core:boo-a-taxi", kwargs={
+            'slug': self.slug
+        })
 
 
+class BookingStatus(models.Model ):
 
-# Trip model
-
-class TripStatus(models.Model ):
     BOOKING_STATUS = 'booking in proccess'
+    BOOKED_STATUS = 'booked'
     TAXI_ARRIVED = 'arrived'
     PASSENGER_ONBOAD = 'onboard'
     TRIP_COMPLETED = 'complete'
     TRIP_CANCELLED = 'cancelled'
     STATUSES = (
         (BOOKING_STATUS,'Booking in process'),
-        (TAXI_ARRIVED,'arrived'),
-        (PASSENGER_ONBOAD , 'Passenger on board'),
+        (TAXI_ARRIVED,'Arrived'),
+        (BOOKED_STATUS , 'booked'),
+        (PASSENGER_ONBOAD , 'You are on board'),
         (TRIP_CANCELLED , 'Trip has been canceled'),
         (TRIP_COMPLETED , 'Trip has been completed')
 
     )
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    customer = models.ForeignKey(Passenger, on_delete=models.CASCADE )
-    name = models.CharField(max_length=225)
-    status = models.CharField(max_length=20, choices= STATUSES,default= BOOKING_STATUS)
-    created_at = models.DateTimeField(default= timezone.now )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    booked = models.BooleanField(default=False)
+    taxi = models.ForeignKey(Taxi, on_delete=models.CASCADE)
+
+
     def __str__(self):
-            return self.name
+        return self.user
 
+class BookingAddress(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    pickup_address = models.CharField(max_length=255, blank=False)
+    dropoff_address = models.CharField(max_length=255, blank=False)
+    pickup_longitude = models.FloatField()
+    pickup_latitude = models.FloatField()
 
+    def __str__(self):
+        return self.user.username
