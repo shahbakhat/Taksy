@@ -23,7 +23,7 @@
 
            <div class="list-group mt-5">
                     <a href="{% url 'passenger:book-a-taxi' %}" class="list-group-item list-group-item-action{% if request.path == book_taxi_url %} active {% endif %}"  >Book a Taxi</a>
-                    <a href="{% url 'passenger:my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}"">My Trips</a>
+                    <a href="{% url 'passenger:my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}">My Trips</a>
                     <a href="{% url 'passenger:profile' %}" class="list-group-item list-group-item-action {% if request.path == profile_url %} active {% endif %} ">Profile Information</a>
                     <a href="{% url 'passenger:payment-method' %}" class="list-group-item list-group-item-action {% if request.path == payment_method_url %} active {% endif %}">Payments Details</a>
                     {% if messages %}

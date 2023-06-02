@@ -7,8 +7,12 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.conf import settings
 import stripe
+from core.models import Taxi, Passenger
+from django.utils import timezone
+from django.http import JsonResponse
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
 
 
 @login_required(login_url="/login/?next=/passenger/")
@@ -55,54 +59,48 @@ def profile_page(request):
                    }
                   )
 
-# PAYMENT METHODS
-@login_required(login_url="/login/?next=/passenger/payment-method")
-def payment_method_page(request):
-#     current_customer = request.user.passenger
-#     #saving the payment method
-#     if not current_customer.stripe_customer_id:
-#         customer = stripe.Customer.create()
-#         current_customer.stripe_customer_id = customer['id']
-#         current_customer.save()
-# # Get stripe payment method
-#     stripe_payment_methods = stripe.PaymentMethod.list(
-#         customer  = current_customer.stripe_customer_id,
-#         type = "card",)
-
-#     print(stripe_payment_methods)
-
-#     #Saving lats 4 digits of customer card
-#     if stripe_payment_methods and len(stripe_payment_methods.data) > 0 :
-#         payment_method = stripe_payment_methods.data[0]
-#         current_customer.stripe_payment_method_id = payment_method.id
-#         current_customer.stripe_card_last4 = payment_method.card.last4
-#         current_customer.save()
-#     else:
-#         current_customer.stripe_payment_method_id = ""
-#         current_customer.stripe_card_last4 = ""
-
-#     # Stripe intent
-#     intent = stripe.SetupIntent.create(
-#         customer = current_customer.stripe_customer_id
-#     )
-
-
-
- return render(request, 'passenger/payment-method.html',)
-#                   {
-#                     "client_secret":intent.client_secret,
-#                     "STRIPE_API_PUBLIC_KEY":settings.STRIPE_API_PUBLIC_KEY,
-#                   }
-#                   )
 
 # BOOKING TAXI
+
 @login_required(login_url="/login/?next=/passenger/book-a-taxi")
 def book_taxi_page(request):
-     return render(request, 'passenger/book-a-taxi.html',)
-    # sourcery skip: assign-if-exp, reintroduce-else, swap-if-expression
-    # if not request.user.customer.stripe_payment_method_id:
+    current_customer = request.user.customer
+    creating_booking = Taxi.objects.filter(taxi_passenger= current_customer, taxi_status = Taxi.BOOKING_IN_PROGRESS)
+    booking_step1_form = forms.TripBookingForm(instance=creating_booking)
+    booking_step2_form = forms.TripBookingForm(instance=creating_booking)
+    # Determine the current step
+
+    return render (request,'passenger/book-a-taxi.html',{
+        "taxi": creating_booking,
+        "booking_step1_form":booking_step1_form,
+        "booking_step2_form":booking_step2_form,
+    })
+
+
 
 #  PASSENGER TRIPS
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
     return render(request, 'passenger/my-trips.html',)
+
+
+#Payment Method
+stripe.api_key = settings.STRIPE_SECRET_KEY
+@login_required(login_url="/login/?next=/passenger/")
+def payment_method_page(request):
+    current_customer = request.user.passenger
+
+    # stripe customer info
+    if not current_customer.stripe_customer_id:
+        customer = stripe.Customer.create()
+        current_customer.stripe_customer_id = customer['id']
+        current_customer.save()
+
+    intent = stripe.SetupIntent.create(
+        customer= current_customer.stripe_customer_id,
+                                        )
+    return render(request, 'passenger/payment-method.html',
+                  {
+                      "client_secret": intent.client_secret,
+                      "STRIPE_API_PUBLIC_KEY": settings.STRIPE_API_PUBLIC_KEY,
+                  })

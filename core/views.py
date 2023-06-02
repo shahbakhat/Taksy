@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django .contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.shortcuts import render
+
 
 from . import forms
 # Create your views here.
@@ -27,3 +29,4 @@ def sign_up(request):  # sourcery skip: extract-method
 
     return render(request, 'sign-up.html', {'form': form
                                             })
+

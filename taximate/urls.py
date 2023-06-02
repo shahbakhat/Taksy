@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from core import views
-
 from core.passenger import  views as passenger_views
 from core.driver import  views as driver_views
 from django.conf.urls.static import static

@@ -19,6 +19,3 @@ class SignUpForm(UserCreationForm):
         if User.objects.filter(email=email):
             raise ValidationError("The email address already exists")
         return email
-
-
-
