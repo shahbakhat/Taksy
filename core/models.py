@@ -58,8 +58,6 @@ class Taxi (models.Model):
     # payment_option = models.CharField(choices=PAYMENT_CHOICES, max_length=2,)
 
     def __str__(self):
-        return self.user.username
-    def __str__(self):
-            return self.title, self.user,self.trip_price,self.pickup_address,self.dropoff_address
+            self.taxi_passenger,self.trip_price,self.pickup_address,self.dropoff_address
 
 

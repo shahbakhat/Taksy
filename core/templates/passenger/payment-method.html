@@ -36,19 +36,25 @@
 
 {% endblock %}
 {% block main %}
+{% if not request.user.passenger.stripe_payment_method_id%}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+ Let's add your Card to <strong>Book a Taxi</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
 
 <b class="text-secomdary">Your Credit/Debit Card</b>
     <div class="card bg-white mt-3 ">
        <div class="card-body">
 
-        {% if request.user.customer.stripe_payment_method_id %}
+        {% if request.user.passenger.stripe_payment_method_id %}
         <div id="change-card" class="input-group">
-          <input type="text" class="form-control" 
-          disabled value=" **** **** **** {{ request.user.customer.stripe_card_last4 }}">
+          <input type="text" class="form-control"
+          disabled value=" **** **** **** {{ request.user.passenger.stripe_card_last4 }}">
           <div class="input-group-append">
-            <form  method="post">
+            <form  method="POST">
               {% csrf_token %}
-              
+              <button type="submit" class="btn btn-danger" >Remove</button>
             </form>
           </div>
         </div>
@@ -60,10 +66,11 @@
           </div>
           <button id="card-button" type="button" class= "btn btn-warning mt-3">Save Card</button>
         </form>
+        {% endif %}
        </div>
 
     </div>
-
+  {% if not request.user.passenger.stripe_payment_method_id %}
 <script>
 var stripe = Stripe("{{STRIPE_API_PUBLIC_KEY}}");
 
@@ -95,4 +102,5 @@ cardButton.addEventListener('click', function(ev){
 });
 });
 </script>
+{% endif %}
 {% endblock %}
