@@ -4,13 +4,12 @@
 {% block head %}
 <link rel="stylesheet" href="checkout.css" />
 <script src="https://js.stripe.com/v3/"></script>
-<script src="checkout.js" defer></script>
   <style>
         #setup-form{
                 padding:2rem;
             }
-            .StripeElement {
-                height:40px;
+            #card-element {
+                height:auto;
                 padding:10px 12px;
                 width:100%;
                 background-color=white;
@@ -22,66 +21,78 @@
                 -webkit-trnsition: box-shadow 150ms ease;
                 transition: box-shadow 150ms ease; {% endcomment %}
             }
-            .StripeElement--focus {
+            #card-element--focus {
                 border-color:#80bdff;
                 box-shadow:0 0 0 0.2rem rgba(0,123,255,.25);
             }
-            .StripeElement--invalid{
+            #card-element--invalid{
                 border-color: #fa755a;
+
             }
-            .StripeElement--webkit-autofil {
+            #card-element--webkit-autofil {
                 background-color:#fefde5 !important;
             }
-</style> 
+</style>
 
 {% endblock %}
 {% block main %}
 
 <b class="text-secomdary">Your Credit/Debit Card</b>
-    <div class="card bg-white ">
+    <div class="card bg-white mt-3 ">
        <div class="card-body">
-        <form id="payment-form">
-            <div id="card-element">
-              <!-- Elements will create input elements here -->
-            </div>
 
-            <!-- We'll put the error messages in this element -->
-            <div id="card-errors" role="alert"></div>
+        {% if request.user.customer.stripe_payment_method_id %}
+        <div id="change-card" class="input-group">
+          <input type="text" class="form-control" 
+          disabled value=" **** **** **** {{ request.user.customer.stripe_card_last4 }}">
+          <div class="input-group-append">
+            <form  method="post">
+              {% csrf_token %}
+              
+            </form>
+          </div>
+        </div>
 
-            <button id="submit" class="btn btn-warning mt-3">Save Card</button>
-          </form>
+        {% else %}
+        <form id="steup-form" data-secret="{{ client_secret }}">
+          <div id="card-element">
+            <!-- Elements will create form elements here -->
+          </div>
+          <button id="card-button" type="button" class= "btn btn-warning mt-3">Save Card</button>
+        </form>
+       </div>
+
     </div>
 
 <script>
-// This is a public sample test API key.
-// Don’t submit any personally identifiable information in requests made with this key.
-// Sign in to see your own test API key embedded in code samples.
-const stripe = Stripe('pk_test_51NAzY8EsGHfqk8451iqCC67T8GcG6tDPK8A66XDilpL5mLpc9ISAm17evseykIO3At4Z44Pcsh0VnLb9JrbDfegN00WWmYU9Dj');
+var stripe = Stripe("{{STRIPE_API_PUBLIC_KEY}}");
 
-(async () => {
-    const response = await fetch('/secret');
-    const {client_secret: clientSecret} = await response.json();
-    // Render the form to collect payment details, then
-    // call stripe.confirmCardPayment() with the client secret.
-  })();
-  var elements = stripe.elements();
-  var style = {
-    base: {
-      color: "#32325d",
+var elements = stripe.elements();
+var cardElement = elements.create('card')
+cardElement.mount('#card-element')
+
+var cardholerName = document.getElementById('cardholer-name');
+var cardButton = document.getElementById('card-button');
+var clientSecret = "{{ client_secret }}";
+
+cardButton.addEventListener('click', function(ev){
+  stripe.confirmCardSetup(
+    clientSecret,
+    {
+      payment_method : {
+        card : cardElement,
+      },
     }
-  };
-  
-  var card = elements.create("card", { style: style });
-  card.mount("#card-element");
+  ).then(function(result)
 
-  card.on('change', ({error}) => {
-    let displayError = document.getElementById('card-errors');
-    if (error) {
-      displayError.textContent = error.message;
+  {
+    window.location.reload();
+    if (result.error){
+      toast(result.error.message, 'error');
     } else {
-      displayError.textContent = '';
-    }
-  });
-
+      toast(result.message, 'success');
+  }
+});
+});
 </script>
 {% endblock %}
