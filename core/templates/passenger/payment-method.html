@@ -37,8 +37,8 @@
 {% endblock %}
 {% block main %}
 {% if not request.user.passenger.stripe_payment_method_id%}
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
- Let's add your Card to <strong>Book a Taxi</strong>
+<div class="alert alert-danger alert-dismissible fade show " role="alert">
+ Let's add your Card first, to <strong>Book a Taxi</strong>
   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}

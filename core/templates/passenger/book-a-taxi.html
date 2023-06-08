@@ -58,35 +58,22 @@
           <div class="card ">
             <div class="card-body">
               <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="pickup-tab-pane" role="tabpanel" aria-labelledby="pickup-tab" tabindex="0">
+                <div class="tab-pane fade  show active" id="pickup-tab-pane" role="tabpanel" aria-labelledby="pickup-tab" tabindex="0">
                   <h3>
-                    Where are you?
-                    <i class="fa-solid ms-3 fa-lg fa-location-crosshairs"></i>
+                   Let's book you a Taxi :
+                   <i class="fa-solid fa-taxi ms-3"></i>
                   </h3>
-                  <p>
-                    Type your address here:
-                  </p>
-                  <!-- Pich up address form-->
-                  <form method="POST">
+                  <hr class="border border-warning border-3 opacity-100">
+                  <!-- Pick up address form-->
+                  <form method="POST" class="form-control mt-3 p-5">
                     {% csrf_token %}
-                    {% bootstrap_form booking_step1_form %}
+                    {% bootstrap_form pickup_form %}
+                    <input type="hidden" name="step" value="1">
+                    <button class="btn btn-warning" type="submit" >Continue</button>
                   </form>
-                  <hr class="border border-warning border-3 opacity-30">
-                  <h3>Where would you like to go?
-                    <i class="fa-regular ms-3 fa-lg fa-map"></i>
-                  </h3>
-                  <p>
-                    Type your destination address here:
-                  </p>
-                  <form method="POST">
-                    {% csrf_token %}
-                    {% bootstrap_form booking_step1_form %}
-                  </form>
-                  <div class="tab-pane fade"  role="tabpanel" aria-labelledby="destination-tab" tabindex="0">
-                  </div>
                 </div>
-
-                <div class="tab-pane fade" id="payment-tab-pane" role="tabpanel" aria-labelledby="payment-tab" tabindex="0">
+                <!-- Payment Tab-->
+                <div class="tab-pane fade  show active" id="payment-tab-pane" role="tabpanel" aria-labelledby="payment-tab" tabindex="0">
                   <h3>How do you want to pay?
                     <i class="fa-solid ms-3 fa-lg fa-money-bill-1"></i>
                   </h3>
@@ -95,7 +82,8 @@
                     Choose your payment method:
                   </p>
                 </div>
-                <div class="tab-pane fade show" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+                <!-- Trip Details Tab-->
+                <div class="tab-pane fade  " id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
                   <h3>
                     Trip Details
                     <i class="fa-solid ms-3 fa-lg fa-circle-info"></i>

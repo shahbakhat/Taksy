@@ -13,13 +13,20 @@ class BasicUserForm(forms.ModelForm):
 class BasicCustomerForm(forms.ModelForm):
     class Meta:
         model = Passenger
-        fields = ('profile_photo', 'phone_number' )
+        fields = ('profile_photo', 'phone_number')
 
-class TripBookingForm(forms.ModelForm):
+class TaxiBookingForm(forms.ModelForm):
+    pickup_address = forms.CharField(max_length=255,required=True,label='',
+                                      widget= forms.TextInput
+                           (attrs={'placeholder':'Where are you?'})
+                                     )
+    dropoff_address = forms.CharField(max_length=255, required=True,label='',
+                                      widget= forms.TextInput
+                           (attrs={'placeholder':'Where you want to go?'}))
+
     class Meta:
         model = Taxi
-        fields = ('pickup_address','dropoff_address', 'pickup_lng','pickup_lat')
-
+        fields = ('pickup_address','pickup_lng','pickup_lat','dropoff_address','dropoff_lat','dropoff_lng')
 
 
 
