@@ -74,23 +74,20 @@ def book_taxi_page(request):  # sourcery skip: assign-if-exp, merge-nested-ifs, 
     # model_instance = creating_booking.first()
     pickup_form = forms.TaxiBookingForm(request.POST, instance=creating_booking)
     if request.method == "POST":
-        if request.POST.get('step') == '1':
-            pickup_form = forms.TaxiBookingForm(request.POST, instance= creating_booking)
-            if pickup_form.is_valid():
-                creating_booking = pickup_form.save(commit=False)
-                creating_booking.taxi_passenger = current_customer
-                creating_booking.save()
-                return redirect(reverse('passenger:book-a-taxi'))
+        pickup_form = forms.TaxiBookingForm(request.POST, instance= creating_booking)
+        if pickup_form.is_valid():
+            creating_booking = pickup_form.save(commit=False)
+            creating_booking.taxi_passenger = current_customer
+            creating_booking.save()
+            return redirect(reverse('passenger:book-a-taxi'))
     # Determine the current step
-    if not creating_booking:
-        current_step = 1
-    else:
-        current_step = 2
+    # if not creating_booking:
+    #     current_step = 1
 
     return render (request,'passenger/book-a-taxi.html',{
         "taxi": creating_booking,
         "pickup_form": pickup_form,
-        "step":current_step,
+        # "step":current_step,
     })
 
 

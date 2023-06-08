@@ -23,6 +23,10 @@ class TaxiBookingForm(forms.ModelForm):
     dropoff_address = forms.CharField(max_length=255, required=True,label='',
                                       widget= forms.TextInput
                            (attrs={'placeholder':'Where you want to go?'}))
+    pickup_lng = forms.FloatField(required=False, )
+    pickup_lat = forms.FloatField(required=False, )
+    dropoff_lng = forms.FloatField(required=False, )
+    dropoff_lat = forms.FloatField(required=False, )
 
     class Meta:
         model = Taxi
