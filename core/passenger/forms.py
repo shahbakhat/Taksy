@@ -16,23 +16,28 @@ class BasicCustomerForm(forms.ModelForm):
         fields = ('profile_photo', 'phone_number')
 
 class TaxiBookingForm(forms.ModelForm):
-    pickup_address = forms.CharField(max_length=255,required=True,label='',
-                                      widget= forms.TextInput
-                           (attrs={'placeholder':'Where are you?',
-                                   })
-                                     )
-    dropoff_address = forms.CharField(max_length=255, required=True,label='',
-                                      widget= forms.TextInput
-                           (attrs={'placeholder':'Where you want to go?',
-                                   }))
-    pickup_lng = forms.FloatField(required=False, )
-    pickup_lat = forms.FloatField(required=False, )
-    dropoff_lng = forms.FloatField(required=False, )
-    dropoff_lat = forms.FloatField(required=False, )
+    pickup_address = forms.CharField(
+        max_length=255,
+        required=True,
+        label='',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Where are you?',
+            # 'id': 'pickup-address-input',
+        })
+    )
+    dropoff_address = forms.CharField(
+        max_length=255,
+        required=True,
+        label='',
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Where you want to go?',
+            # 'id': 'dropoff-address-input',
+        })
+    )
 
     class Meta:
         model = Taxi
-        fields = ('pickup_address','pickup_lng','pickup_lat','dropoff_address','dropoff_lat','dropoff_lng', 'taxi_size')
+        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address', 'dropoff_lng', 'dropoff_lat', 'taxi_size')
 
 
 

@@ -78,6 +78,7 @@ def book_taxi_page(request):  # sourcery skip: assign-if-exp, merge-nested-ifs, 
             if pickup_form.is_valid():
                 creating_booking = pickup_form.save(commit=False)
                 creating_booking.taxi_passenger = current_customer
+
                 creating_booking.save()
                 return redirect(reverse('passenger:book-a-taxi'))
             else:
