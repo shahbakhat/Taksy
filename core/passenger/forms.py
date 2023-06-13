@@ -18,11 +18,13 @@ class BasicCustomerForm(forms.ModelForm):
 class TaxiBookingForm(forms.ModelForm):
     pickup_address = forms.CharField(max_length=255,required=True,label='',
                                       widget= forms.TextInput
-                           (attrs={'placeholder':'Where are you?'})
+                           (attrs={'placeholder':'Where are you?',
+                                   })
                                      )
     dropoff_address = forms.CharField(max_length=255, required=True,label='',
                                       widget= forms.TextInput
-                           (attrs={'placeholder':'Where you want to go?'}))
+                           (attrs={'placeholder':'Where you want to go?',
+                                   }))
     pickup_lng = forms.FloatField(required=False, )
     pickup_lat = forms.FloatField(required=False, )
     dropoff_lng = forms.FloatField(required=False, )
@@ -30,7 +32,7 @@ class TaxiBookingForm(forms.ModelForm):
 
     class Meta:
         model = Taxi
-        fields = ('pickup_address','pickup_lng','pickup_lat','dropoff_address','dropoff_lat','dropoff_lng')
+        fields = ('pickup_address','pickup_lng','pickup_lat','dropoff_address','dropoff_lat','dropoff_lng', 'taxi_size')
 
 
 

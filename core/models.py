@@ -17,7 +17,7 @@ class Passenger(models.Model):
     stripe_payment_method_id= models.CharField(max_length=225, blank=True)
     stripe_card_last4 = models.CharField(max_length=225, blank=True)
     def __str__(self):
-        return self.user.get_full_name()
+        return self.user.get_full_name() or str(self.user)
 
 # Taxi models
 class Taxi (models.Model):
@@ -52,15 +52,16 @@ class Taxi (models.Model):
     taxi_size =models.CharField(max_length=10,choices=TAXI_SIZE, default=FIVE_SEATER)
     pickup_address = models.CharField(max_length=255, blank=False, default=None)
     dropoff_address = models.CharField(max_length=255, blank=False, default=None)
-    pickup_lng = models.FloatField(default=0.0)
-    pickup_lat = models.FloatField(default=0.0)
-    dropoff_lng = models.FloatField(default=0.0)
-    dropoff_lat = models.FloatField(default=0.0)
-    trip_price = models.FloatField(default=0)
+    pickup_lng = models.FloatField(default=0.0, null = True)
+    pickup_lat = models.FloatField(default=0.0, null = True)
+    dropoff_lng = models.FloatField(default=0.0, null = True)
+    dropoff_lat = models.FloatField(default=0.0, null = True)
+    trip_price = models.FloatField(default=0, null = True)
     taxi_booking_status = models.CharField(max_length=100, choices=STATUSES, default=BOOKING_IN_PROGRESS)
     # payment_option = models.CharField(choices=PAYMENT_CHOICES, max_length=2,)
 
     def __str__(self):
-            return self.taxi_passenger
+        return self.taxi_passenger.user.get_full_name()
+
 
 

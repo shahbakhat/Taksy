@@ -19,6 +19,7 @@
    #pickup-map{
     height: 100%;
    }
+
 </style>
 {% endblock %}
 {% block content %}
@@ -65,20 +66,23 @@
                 <form method="POST" class="mt-3">
                   <div class="card bg-white mt-2 mb-5" height="100vh">
                     <div class="card-body">
-                        <div class="container">
-                          <div class="row" width="auto">
-                            <div class="col-6">
-                              {% csrf_token %}
-                              {% bootstrap_form pickup_form %}
-                              <input type="hidden" id="pickup_lat" name="pikup_lat" value = {{ taxi.pickup_lat }}>
-                              <input type="hidden" id="pickup_lng" name="pikup_lng" value = {{ taxi.pickup_lng }}></div>
-                            <div class="col-6"> <div id="pickup-map"></div>
+                      <div class="container">
+                        <div class="row">
+                          <div class="col-6">
+                            {% csrf_token %}
+                            {% bootstrap_form pickup_form exclude='pickup_lat,pickup_lng,dropoff_lat,dropoff_lng' %}
+                            <input type="hidden" id="pickup-lat" name="pickup-lat" value="{{ taxi.pickup_lat }}">
+                            <input type="hidden" id="pickup-lng" name="pickup-lng" value="{{ taxi.pickup_lng }}">
+                          </div>
+                          <div class="col-6">
+                            <div id="pickup-map"></div>
                             <div id="infowindow-content">
                               <span id="place-name" class="title"></span><br />
                               <span id="place-address"></span>
-                            </div></div>
+                            </div>
                           </div>
                         </div>
+                      </div>
                       </div>
                     </div>
                   </div>
@@ -99,19 +103,19 @@
                 {% endif %}
                 </div>
                 </div>
-                <input type="hidden" name="step" value="1">
+                <input type="hidden" name="booking-info" value="1">
                 <button class="btn btn-warning mt-4" type="submit" >Continue</button>
                 </form>
               </div>
               <!-- Payment Method-->
               <!-- Trip Details Tab-->
-              {% comment %} <div class="tab-pane fade  " id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+             <div class="tab-pane fade  " id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
                 <h3>
                   Trip Details
                   <i class="fa-solid ms-3 fa-lg fa-circle-info"></i>
                 </h3>
                 <hr class="border border-warning border-3 opacity-100">
-              </div> {% endcomment %}
+              </div>
             </div>
     </div>
   </div>
@@ -121,55 +125,100 @@
  // This example requires the Places library. Include the libraries=places
 // parameter when you first load the API. For example:
 // <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
-function initMap() {
-  const map = new google.maps.Map(document.getElementById("pickup-map"), {
-    center: { lat: 40.749933, lng: -73.98633 },
-    zoom: 13,
-    mapTypeControl: false,
-  });
-  const card = document.getElementById("pac-card");
-  const input = document.getElementById("id_pickup_address");
-  const biasInputElement = document.getElementById("use-location-bias");
-  const strictBoundsInputElement = document.getElementById("use-strict-bounds");
-  const options = {
-    fields: ["formatted_address", "geometry", "name"],
-    strictBounds: false,
-    types: ["establishment"],
-  };
+  var pickupLat = parseFloat ('{{ taxi.pickup_lat }}')
+  var pickupLng = parseFloat ('{{ taxi.pickup_lng }}')
+  var dropoffLat = parseFloat ('{{ taxi.dropoff_lat }}')
+  var dropoffLng = parseFloat ('{{ taxi.dropoff_lng }}')
+// This example requires the Places library. Include the libraries=places
+// parameter when you first load the API. For example:
+// <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places">
+  function initMap() {
+    const map = new google.maps.Map(document.getElementById("pickup-map"), {
+      center: { lat: 40.749933, lng: -73.98633 },
+      zoom: 13,
+      mapTypeControl: false,
+    });
+    const pickupInput = document.getElementById("id_pickup_address");
+    const biasInputElement = document.getElementBId("use-location-bias");
+    const strictBoundsInputElement = document.getElementById("use-strict-bounds");
+    const options = {
+      fields: ["formatted_address", "geometry", "name"],
+      strictBounds: false,
+      types: ["establishment"],
+    };
 
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(card);
+    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, options);
+    // Bind the map's bounds (viewport) property to the autocomplete object,
+    // so that the autocomplete requests use the current map bounds for the
+    // bounds option in the request.
+    pickupAutocomplete.bindTo("bounds", map);
+    const infowindow = new google.maps.InfoWindow();
+    const infowindowContent = document.getElementById("infowindow-content");
+  
+    infowindow.setContent(infowindowContent);
+  
+    const marker = new google.maps.Marker({
+      map,
+      anchorPoint: new google.maps.Point(0, -29),
+    });
+  
+    pickupAutocomplete.addListener("place_changed", () => {
+      infowindow.close();
+      marker.setVisible(false);
+      
+  
+      const place = pcikupAutocomplete.getPlace();
+      document.getElementById("pickup-lat").value = place.geometry.location.lat();
+      document.getElementById("pickup-lng").value = place.geometry.location.lng();
+      pickupLat = place.geometry.location.lat();
+      pickupLng = place.geometry.location.lng();
+  
+      if (!place.geometry || !place.geometry.location) {
+        // User entered the name of a Place that was not suggested and
+        // pressed the Enter key, or the Place Details request failed.
+        window.alert("No details available for input: '" + place.name + "'");
+        return;
+      }
+  
+      // If the place has a geometry, then present it on a map.
+      if (place.geometry.viewport) {
+        map.fitBounds(place.geometry.viewport);
+      } else {
+        map.setCenter(place.geometry.location);
+        map.setZoom(17);
+      }
+      marker.setPosition(place.geometry.location);
+      marker.setVisible(true);
+      infowindowContent.children["place-name"].textContent = place.name;
+      infowindowContent.children["place-address"].textContent =
+      place.formatted_address;
+      infowindow.open(map, marker);
+    });
 
-  const autocomplete = new google.maps.places.Autocomplete(input, options);
-
-  // Bind the map's bounds (viewport) property to the autocomplete object,
-  // so that the autocomplete requests use the current map bounds for the
-  // bounds option in the request.
-  autocomplete.bindTo("bounds", map);
-
-  const infowindow = new google.maps.InfoWindow();
-  const infowindowContent = document.getElementById("infowindow-content");
-
-  infowindow.setContent(infowindowContent);
-
-  const marker = new google.maps.Marker({
+  const dropoffInput = document.getElementById("id_dropoff_address");
+  const dropoffMarker = new google.maps.Marker({
     map,
     anchorPoint: new google.maps.Point(0, -29),
   });
+  const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, options);
 
-  autocomplete.addListener("place_changed", () => {
+  dropoffAutocomplete.bindTo("bounds", map);
+
+  dropoffAutocomplete.addListener("place_changed", () => {
     infowindow.close();
-    marker.setVisible(false);
+    dropoffMarker.setVisible(false);
 
-    const place = autocomplete.getPlace();
+    const place = dropoffAutocomplete.getPlace();
+    document.getElementById("dropoff-lat").value = place.geometry.location.lat();
+      document.getElementById("dropoff-lng").value = place.geometry.location.lng();
+      dropoffLat = place.geometry.location.lat();
+      dropoffLng = place.geometry.location.lng();
 
     if (!place.geometry || !place.geometry.location) {
-      // User entered the name of a Place that was not suggested and
-      // pressed the Enter key, or the Place Details request failed.
       window.alert("No details available for input: '" + place.name + "'");
       return;
     }
 
-    // If the place has a geometry, then present it on a map.
     if (place.geometry.viewport) {
       map.fitBounds(place.geometry.viewport);
     } else {
@@ -177,62 +226,62 @@ function initMap() {
       map.setZoom(17);
     }
 
-    marker.setPosition(place.geometry.location);
-    marker.setVisible(true);
-    infowindowContent.children["place-name"].textContent = place.name;
-    infowindowContent.children["place-address"].textContent =
-      place.formatted_address;
-    infowindow.open(map, marker);
-  });
+    dropoffMarker.setPosition(place.geometry.location);
+    dropoffMarker.setVisible(true);
 
-  // Sets a listener on a radio button to change the filter type on Places
-  // Autocomplete.
-  function setupClickListener(id, types) {
-    const radioButton = document.getElementById(id);
-
-    radioButton.addEventListener("click", () => {
-      autocomplete.setTypes(types);
-      input.value = "";
-    });
-  }
-
-  setupClickListener("changetype-all", []);
-  setupClickListener("changetype-address", ["address"]);
-  setupClickListener("changetype-establishment", ["establishment"]);
-  setupClickListener("changetype-geocode", ["geocode"]);
-  setupClickListener("changetype-cities", ["(cities)"]);
-  setupClickListener("changetype-regions", ["(regions)"]);
-  biasInputElement.addEventListener("change", () => {
-    if (biasInputElement.checked) {
-      autocomplete.bindTo("bounds", map);
-    } else {
-      // User wants to turn off location bias, so three things need to happen:
-      // 1. Unbind from map
-      // 2. Reset the bounds to whole world
-      // 3. Uncheck the strict bounds checkbox UI (which also disables strict bounds)
-      autocomplete.unbind("bounds");
-      autocomplete.setBounds({ east: 180, west: -180, north: 90, south: -90 });
-      strictBoundsInputElement.checked = biasInputElement.checked;
-    }
-
-    input.value = "";
-  });
-  strictBoundsInputElement.addEventListener("change", () => {
-    autocomplete.setOptions({
-      strictBounds: strictBoundsInputElement.checked,
-    });
-    if (strictBoundsInputElement.checked) {
-      biasInputElement.checked = strictBoundsInputElement.checked;
-      autocomplete.bindTo("bounds", map);
-    }
-
-    input.value = "";
+    // Additional code specific to dropoff location
+    // Update input fields or perform any other actions
+    document.getElementById("dropoff-lat").value = place.geometry.location.lat();
+    document.getElementById("dropoff-lng").value = place.geometry.location.lng();
     
   });
-  $("#pickup_lat").val(place.geometry.location.lat());
-  $("#pickup_lng").val(place.geometry.location.lng());
-}
 
-window.initMap = initMap;
+
+
+    // Sets a listener on a radio button to change the filter type on Places
+    // Autocomplete.
+    function setupClickListener(id, types) {
+      const radioButton = document.getElementById(id);
+
+      radioButton.addEventListener("click", () => {
+        pickupAutocomplete.setTypes(types);
+        input.value = "";
+      });
+    }
+
+    setupClickListener("changetype-all", []);
+    setupClickListener("changetype-address", ["address"]);
+    setupClickListener("changetype-establishment", ["establishment"]);
+    setupClickListener("changetype-geocode", ["geocode"]);
+    setupClickListener("changetype-cities", ["(cities)"]);
+    setupClickListener("changetype-regions", ["(regions)"]);
+    biasInputElement.addEventListener("change", () => {
+      if (biasInputElement.checked) {
+        pcikupAutocomplete.bindTo("bounds", map);
+      } else {
+        // User wants to turn off location bias, so three things need to happen:
+        // 1. Unbind from map
+        // 2. Reset the bounds to whole world
+        // 3. Uncheck the strict bounds checkbox UI (which also disables strict bounds)
+        pickupAutocomplete.unbind("bounds");
+        pickkupAutocomplete.setBounds({ east: 180, west: -180, north: 90, south: -90 });
+        strictBoundsInputElement.checked = biasInputElement.checked;
+      }
+
+      input.value = "";
+    });
+    strictBoundsInputElement.addEventListener("change", () => {
+      pickupAutocomplete.setOptions({
+        strictBounds: strictBoundsInputElement.checked,
+      });
+      if (strictBoundsInputElement.checked) {
+        biasInputElement.checked = strictBoundsInputElement.checked;
+        pickupAutocomplete.bindTo("bounds", map);
+      }
+  
+      pickupInput.value = "";
+    });
+  }
+  window.initMap = initMap;
 </script>
 {% endblock %}
