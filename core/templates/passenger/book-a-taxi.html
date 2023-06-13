@@ -5,6 +5,7 @@
    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio&callback=initMap&libraries=places&v=weekly"
    defer
    ></script>
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
    #myTab button {
    color: black;
@@ -20,108 +21,129 @@
     height: 100%;
    }
 
+   #distance-output {
+    display: inline-block;
+    height: 40px; /* Adjust the height as per your requirement */
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
 </style>
 {% endblock %}
-{% block content %}
+{% block main %}
 <div class="container mt-4">
-  <div class="row">
-    <!--LEFT SIDE-->
-    <div class="col-lg-4 mb-4">
-      <div class="card">
-        <div class="card-header">
-          TRIP SUMMARY
+        <div class="card mb-4">
+           <div class="card-body">
+              <ul class="nav nav-tabs justify-content-center mb-3" id="myTab" role="tablist">
+                 <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if not show_trip_details %}active {% else%} disabled {% endif %}" id="pickup-tab" data-bs-toggle="tab" data-bs-target="#pickup-tab-pane" type="button" role="tab" aria-controls="pickup-tab-pane" aria-selected="true">Book a Taxi</button>
+                 </li>
+                 <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if show_trip_details %}active{% endif %}" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="false">Trip Details</button>
+                 </li>
+              </ul>
+           </div>
         </div>
-        <div class="card-body">
-          <p> A summary of your trip will appear here.</p>
-        </div>
-      </div>
-    </div>
-    <!--RIGHT SIDE-->
-    <div class="col-lg-8">
-      <!-- STEP TABS -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <ul class="nav nav-tabs nsv-justified align-items-center mb3" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="pickup-tab" data-bs-toggle="tab" data-bs-target="#pickup-tab-pane" type="button" role="tab"
-                aria-controls="pickup-tab-pane" aria-selected="false">Book a Taxi</button>
-            </li>
-            {% comment %} <li class="nav-item" role="presentation">
-              <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" a
-                ria-controls="details-tab-pane" aria-selected="true">Trip Details</button>
-            </li> {% endcomment %}
-          </ul>
-        </div>
-      </div>
-      <!-- STEP FORMs-->
-
-            <div class="tab-content" id="myTabContent">
-              <div class="tab-pane fade  show active" id="pickup-tab-pane" role="tabpanel" aria-labelledby="pickup-tab" tabindex="0">
-                <h3>
-                  Let's book you a Taxi :
-                  <i class="fa-solid fa-taxi ms-3"></i>
-                </h3>
-                <hr class="border border-warning border-3 opacity-100">
-                <!-- Taxi Booking Form-->
-                <form method="POST"  class="mt-3">
-                  <div class="card bg-white mt-2 mb-5" height="100vh">
+        <!-- STEP FORMS -->
+        <div class="tab-content" id="myTabContent">
+           <div class="tab-pane fade  {% if not show_trip_details %}show active{% endif %}" id="pickup-tab-pane" role="tabpanel" aria-labelledby="pickup-tab">
+              <h3>
+                 Let's book you a Taxi :
+                 <i class="fa-solid fa-taxi ms-3"></i>
+              </h3>
+              <hr class="border border-warning border-3 opacity-100">
+              <!-- ... content of the "Book a Taxi" tab ... -->
+              <form method="POST" class="mt-3">
+                 <!-- Form content here -->
+                 <div class="card bg-white mt-2 mb-5">
                     <div class="card-body">
-                      <div class="container">
-                        <div class="row">
-                          <div class="col-6">
-                            {% csrf_token %}
-                            {% bootstrap_form pickup_form exclude='pickup_lat,pickup_lng,dropoff_lat,dropoff_lng' %}
-                            <input type="hidden" id="pickup-lng" name="pickup_lng" value="{{ taxi.pickup_lng }}">
-                            <input type="hidden" id="pickup-lat" name="pickup_lat" value="{{ taxi.pickup_lat }}">
-                            <input type="hidden" id="dropoff-lng" name="dropoff_lng" value="{{ taxi.dropoff_lng }}">
-                            <input type="hidden" id="dropoff-lat" name="dropoff_lat" value="{{ taxi.dropoff_lat }}">
+                       <div class="container">
+                          <div class="row">
+                             <div class="col-6">
+                                {% csrf_token %}
+                                {% bootstrap_form pickup_form exclude='pickup_lat,pickup_lng,dropoff_lat,dropoff_lng' %}
+                                <div class="input-group">
+                                   <input type="text" class="form-control" value="{{ phone_number }}" readonly>
+                                </div>
+                                <input type="hidden" id="pickup-lng" name="pickup_lng" value="{{ taxi.pickup_lng }}">
+                                <input type="hidden" id="pickup-lat" name="pickup_lat" value="{{ taxi.pickup_lat }}">
+                                <input type="hidden" id="dropoff-lng" name="dropoff_lng" value="{{ taxi.dropoff_lng }}">
+                                <input type="hidden" id="dropoff-lat" name="dropoff_lat" value="{{ taxi.dropoff_lat }}">
+                                <div class="input-group">
+                                   <span id="distance-output" class="form-control mt-3" readonly> Distance :</span>
+                                </div> <div class="card p-3 mt-3">
+                                  <b class="p-2 ">
+                                     Your Payment Method<a href="{% url 'passenger:payment-method' %}" class="link-danger float-end link-opacity-10 link-offset-2 link-underline-opacity-20 link-underline-opacity-10-hover">
+                                     <i class="ms-5  fa-solid fa-pen-to-square"></i></a>
+                                     <hr class="border border-warning border-3 opacity-50">
+                                  </b>
+                                  <div class="card-body" >
+                                     <input type="text" class="form-control" value="**** **** **** {{ taxi_passenger_payment_method }}" readonly>
+                                  </div>
+                               </div>
+                             </div>
+                             <div class="col-6">
+                              <div id="pickup-map"></div>
+                              <div id="infowindow-content">
+                                 <span id="place-name" class="title"></span><br>
+                                 <span id="place-address"></span>
+                              </div>
+                           </div>
                           </div>
-                          <div class="col-6">
-                            <div id="pickup-map"></div>
-                            <div id="infowindow-content">
-                              <span id="place-name" class="title"></span><br />
-                              <span id="place-address"></span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      </div>
+                       </div>
                     </div>
-                  </div>
-                  <div class="card p-3">
-                    <b class="p-2 ">
-                      Your Payment Method<a href="{% url 'passenger:payment-method' %}" class="link-danger float-end link-opacity-10 link-offset-2 link-underline-opacity-20 link-underline-opacity-10-hover">
-                      <i class="ms-5  fa-solid fa-pen-to-square"></i></a>
-                      <hr class="border border-warning border-3 opacity-50">
-                    </b>
-                    <div class="card-body" >
-                      {% if request.user.passenger.stripe_payment_method_id %}
-                      <div id="change-card" class="input-group">
-                        <input type="text" class="form-control"
-                          disabled value=" **** **** **** {{ request.user.passenger.stripe_card_last4 }}">
-                        <div class="input-group-append">
-                </div>
-                </div>
-                {% endif %}
-                </div>
-                </div>
-                <input type="hidden" name="booking-info" value="1">
-                <button class="btn btn-warning mt-4" type="submit" >Continue</button>
-                </form>
+                 </div>
+                 <input type="hidden" name="booking-info" value="1">
+                 <button class="btn btn-warning mt-4" type="submit" >Continue</button>
+              </form>
+           </div>
+              <div class="tab-pane fade {% if show_trip_details %}show active{% endif %}" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab">
+                 <h3>
+                    Trip Details
+                    <i class="fa-solid ms-3 fa-lg fa-circle-info"></i>
+                 </h3>
+                 <hr class="border border-warning border-3 opacity-100">
+                 <form method="POST" class="mt-3">
+                  {% csrf_token %}
+                    <div class="card bg-white mt-2 mb-5">
+                       <div class="card-body">
+                          <div class="container">
+                             <div class="row">
+                                <div class="col-8">
+                                   <div class="form-group">
+                                      <label for="pickup-address" class="mt-3">Pickup Address</label>
+                                      <input type="text" class="form-control " id="pickup-address" value="{{ taxi.pickup_address }}" readonly>
+                                      <label for="pickup-address" class="mt-3">Destination</label>
+                                      <input type="text" class="form-control  " id="dropoff-address" value="{{ taxi.dropoff_address }}" readonly>
+                                      <label for="pickup-address" class="mt-3">Distance</label>
+                                      <input type="text" class="form-control  " id="distance" value="{{ taxi.distance }}" readonly>
+                                      <label for="phone-number" class="mt-3">Phone Number</label>
+                                      <input type="text" class="form-control  " id="phone-number" value="{{ phone_number }}" readonly>
+                                      <label for="description" class="mt-3">Description</label>
+                                      <input type="text" class="form-control  " id="description" value="{{ taxi.description }}" readonly>
+                                   </div>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                    <input type="hidden" name="confirm-booking" value="2">
+                 <button class="btn btn-warning mt-4" type="submit" >Go to Bookings</button>
+                 </form>
               </div>
-              <!-- Payment Method-->
-              <!-- Trip Details Tab-->
-             <div class="tab-pane fade  " id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
-                <h3>
-                  Trip Details
-                  <i class="fa-solid ms-3 fa-lg fa-circle-info"></i>
-                </h3>
-                <hr class="border border-warning border-3 opacity-100">
-              </div>
-            </div>
-    </div>
-  </div>
+           </div>
+        </div>
 </div>
+
+
+
+
+
+
 <!-- GOOGLE MAP JAVASCRIPT-->
 <script>
   var pickupLat = parseFloat('{{ taxi.pickup_lat }}');
@@ -131,7 +153,7 @@
 
   function initMap() {
     const map = new google.maps.Map(document.getElementById("pickup-map"), {
-      center: { lat: 40.749933, lng: -73.98633 },
+      center: { lat: 53.349805, lng: -6.26031 }, // Centered on Dublin, Ireland
       zoom: 13,
       mapTypeControl: false,
     });
@@ -150,8 +172,14 @@
       types: ["establishment"],
     };
 
-    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, options);
-    const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, options);
+    const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, {
+      types: ['geocode'],
+      componentRestrictions: { country: 'IE' }
+    });
+    const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, {
+      types: ['geocode'],
+      componentRestrictions: { country: 'IE' }
+    });
 
     pickupAutocomplete.bindTo("bounds", map);
     dropoffAutocomplete.bindTo("bounds", map);
@@ -174,6 +202,14 @@
 
       dropoffLatInput.value = place.geometry.location.lat();
       dropoffLngInput.value = place.geometry.location.lng();
+      calculateDistance();
+    });
+
+    pickupInput.addEventListener("input", () => {
+      calculateDistance();
+    });
+
+    dropoffInput.addEventListener("input", () => {
       calculateDistance();
     });
 
@@ -210,7 +246,7 @@
   }
 
   window.initMap = initMap;
-</script>
 
+</script>
 
 {% endblock %}

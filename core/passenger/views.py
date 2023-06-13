@@ -9,7 +9,11 @@ from django.conf import settings
 import stripe
 from core.models import Taxi, Passenger
 from django.utils import timezone
-from django.http import JsonResponse
+import googlemaps
+from googlemaps import convert
+from googlemaps import distance_matrix
+from django.utils.text import slugify
+
 
 
 
@@ -62,37 +66,75 @@ def profile_page(request):
 
 # BOOKING TAXI
 
+
+
+
 @login_required(login_url="/login/?next=/passenger/book-a-taxi")
-def book_taxi_page(request):  # sourcery skip: assign-if-exp, merge-nested-ifs, swap-if-expression, swap-nested-ifs
+def book_taxi_page(request):
     current_customer = request.user.passenger
 
     if not request.user.passenger.stripe_payment_method_id:
-
         return redirect(reverse('passenger:payment-method'))
 
     creating_booking = Taxi.objects.filter(taxi_passenger=current_customer, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS).last()
-    pickup_form = forms.TaxiBookingForm(instance=creating_booking)
+    phone_number = current_customer.phone_number
+    taxi_passenger_payment_method = current_customer.stripe_card_last4
+    description = Taxi.description
+
     if request.method == "POST":
         pickup_form = forms.TaxiBookingForm(request.POST, instance=creating_booking)
         if request.POST.get('booking-info') == '1':
             if pickup_form.is_valid():
+                # Process the form data and save the booking
                 creating_booking = pickup_form.save(commit=False)
                 creating_booking.taxi_passenger = current_customer
 
-                creating_booking.save()
-                return redirect(reverse('passenger:book-a-taxi'))
-            else:
-             pickup_form = forms.TaxiBookingForm(instance=creating_booking)
-    # Determine the current step
-    # if not creating_booking:
-    #     current_step = 1
+                # Generate a unique slug for the taxi based on its attributes
+                slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
+                creating_booking.slug = slug
 
-    return render (request,'passenger/book-a-taxi.html',{
+                creating_booking.save()
+
+                # Calculate the distance using Google Maps Distance Matrix API
+                gmaps = googlemaps.Client(key='AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio')
+                origins = f"{creating_booking.pickup_lat},{creating_booking.pickup_lng}"
+                destinations = f"{creating_booking.dropoff_lat},{creating_booking.dropoff_lng}"
+                result = gmaps.distance_matrix(origins, destinations, mode='driving')
+
+                # Extract the distance value from the API response
+                distance = result['rows'][0]['elements'][0]['distance']['value']
+                # Convert distance to kilometers (optional)
+                distance_km = distance / 1000
+
+                # Save the distance to the booking model
+                creating_booking.distance = distance_km
+                creating_booking.save()
+
+                # Clear the form
+                pickup_form = forms.TaxiBookingForm()
+
+                return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
+            else:
+                pickup_form = forms.TaxiBookingForm(instance=creating_booking)
+        elif request.POST.get('confirm-booking') == '2':
+            return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
+
+    else:
+        pickup_form = forms.TaxiBookingForm(instance=creating_booking)
+
+    show_trip_details = request.GET.get('show_trip_details') == 'true'
+
+    return render(request, 'passenger/book-a-taxi.html', {
         "taxi": creating_booking,
         "pickup_form": pickup_form,
-        # "step": current_step
-        # "step":current_step,
+        "phone_number": phone_number,
+        "show_trip_details": show_trip_details,
+        "taxi_passenger_payment_method": taxi_passenger_payment_method,
+        "description": description,
     })
+
+
+
 
 
 

@@ -30,14 +30,21 @@ class TaxiBookingForm(forms.ModelForm):
         required=True,
         label='',
         widget=forms.TextInput(attrs={
-            'placeholder': 'Where you want to go?',
+            'placeholder': 'Where do you want to go?',
             # 'id': 'dropoff-address-input',
         })
     )
+    description = forms.CharField(
+    widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Write description or a message for Driver'}),
+    required=False
+)
+
+    # distance = forms.CharField(required=False ,)
+
 
     class Meta:
         model = Taxi
-        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address', 'dropoff_lng', 'dropoff_lat', 'taxi_size')
+        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address','dropoff_lng', 'dropoff_lat', 'taxi_size','description')
 
 
 
