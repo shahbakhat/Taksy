@@ -13,7 +13,6 @@ import googlemaps
 from googlemaps import convert
 from googlemaps import distance_matrix
 from django.utils.text import slugify
-from .forms import TaxiBookingForm
 
 
 
@@ -76,10 +75,9 @@ def book_taxi_page(request):
 
     phone_number = current_customer.phone_number
     taxi_passenger_payment_method = current_customer.stripe_card_last4
-    description = Taxi.description
 
     if request.method == "POST":
-        pickup_form = TaxiBookingForm(request.POST)
+        pickup_form = forms.TaxiBookingForm(request.POST)
         if request.POST.get('booking-info') == '1':
             if pickup_form.is_valid():
                 # Create a new booking instance
@@ -98,11 +96,29 @@ def book_taxi_page(request):
                 slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
                 creating_booking.slug = slug
 
-                # Save the booking instance
+                # Calculate the distance using Google Maps Distance Matrix API
+                gmaps = googlemaps.Client(key='AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio')  # Replace with your API key
+                origins = f"{creating_booking.pickup_lat},{creating_booking.pickup_lng}"
+                destinations = f"{creating_booking.dropoff_lat},{creating_booking.dropoff_lng}"
+                result = gmaps.distance_matrix(origins, destinations, mode='driving')
+
+                # Extract the distance value from the API response
+                distance = result['rows'][0]['elements'][0]['distance']['value']
+                # Convert distance to kilometers (optional)
+                distance_km = distance / 1000
+
+                # Save the distance to the booking model
+                creating_booking.trip_distance = distance_km
+
+                # Retrieve the description from the Taxi model instance
+                creating_booking.description = pickup_form.cleaned_data['description']
+                # Save the current timestamp as the booking time
+                creating_booking.pickup_time = timezone.now()
+
                 creating_booking.save()
 
                 # Clear the form
-                pickup_form = TaxiBookingForm()
+                pickup_form = forms.TaxiBookingForm()
 
                 # Add success message
                 messages.success(request, "Booking created successfully!")
@@ -115,7 +131,7 @@ def book_taxi_page(request):
             return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
 
     else:
-        pickup_form = TaxiBookingForm()
+        pickup_form = forms.TaxiBookingForm()
 
     show_trip_details = request.GET.get('show_trip_details') == 'true'
 
@@ -124,25 +140,9 @@ def book_taxi_page(request):
         "phone_number": phone_number,
         "show_trip_details": show_trip_details,
         "taxi_passenger_payment_method": taxi_passenger_payment_method,
-        "description": description,
     })
 
-
-@login_required(login_url="/login/?next=/passenger/")
-def cancel_trip(request, trip_id):
-    try:
-        trip = get_object_or_404(Taxi, id=trip_id, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS)
-        trip.delete()
-        messages.success(request, "Booking deleted successfully!")
-        return redirect(reverse('passenger:my-trips'))
-    except Taxi.DoesNotExist:
-        messages.error(request, "Booking not found or cannot be deleted.")
     
-    return redirect(reverse('passenger:my-trips'))
-
-
-
-
 #  PASSENGER TRIPS
 
 @login_required(login_url="/login/?next=/passenger/")
@@ -158,7 +158,17 @@ def my_trips_page(request):
 
     return render(request, 'passenger/my-trips.html', context)
 
-
+@login_required(login_url="/login/?next=/passenger/")
+def cancel_trip(request, trip_id):
+    try:
+        trip = get_object_or_404(Taxi, id=trip_id, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS)
+        trip.delete()
+        messages.success(request, "Booking deleted successfully!")
+        return redirect(reverse('passenger:my-trips'))
+    except Taxi.DoesNotExist:
+        messages.error(request, "Booking not found or cannot be deleted.")
+    
+    return redirect(reverse('passenger:my-trips'))
 
 
 

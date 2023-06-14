@@ -26,6 +26,7 @@ class Taxi (models.Model):
     taxi_passenger = models.ForeignKey(Passenger, on_delete=models.CASCADE, null=False)
     taxi_passenger_phone_number =models.CharField(max_length=50,default='')
     taxi_passneger_payment_method = models.CharField(max_length=50,default='')
+# Taxi size and status field
     FIVE_SEATER = "5 Seater"
     SEVEN_SEATER = "7 Seater"
     EIGHT_SEATER = "7 Seater"
@@ -34,7 +35,6 @@ class Taxi (models.Model):
         (SEVEN_SEATER ,' 7 Seater'),
         (EIGHT_SEATER ,' 8 Seater'),
     )
-    # Booking Statusses
     BOOKING_IN_PROGRESS = 'booking in proccess'
     BOOKING_STATUS = 'booked'
     TAXI_ARRIVED = 'arrived'
@@ -50,7 +50,7 @@ class Taxi (models.Model):
         (TRIP_COMPLETED , 'Trip has been completed')
 
     )
-    # Booking details
+#Taxi booking details fields
     taxi_size =models.CharField(max_length=10,choices=TAXI_SIZE, default=FIVE_SEATER)
     pickup_address = models.CharField(max_length=255, blank=False, default=None)
     dropoff_address = models.CharField(max_length=255, blank=False, default=None)
@@ -60,15 +60,13 @@ class Taxi (models.Model):
     dropoff_lat = models.FloatField(default=0.0, null = True)
     trip_price = models.FloatField(default=0, null = True)
     taxi_booking_status = models.CharField(max_length=100, choices=STATUSES, default=BOOKING_IN_PROGRESS)
-    distance = models.CharField(default=0, null=True, max_length=255)
+    trip_distance = models.FloatField(default=0, null=True)
     description = models.CharField(max_length=500, default='')
-    taxi_fare = models.FloatField(default=0)
+    trip_fare = models.FloatField(default=0)
     duration = models.IntegerField(default=0)
     pickup_time = models.DateTimeField(default=timezone.now)
     pickup_date =models.CharField(max_length=500, default='')
 
-
-    # payment_option = models.CharField(choices=PAYMENT_CHOICES, max_length=2,)
 
     def __str__(self):
         return f"{self.taxi_passenger.user.get_full_name()} - {self.taxi_passenger.phone_number}"
