@@ -42,7 +42,7 @@ class Taxi (models.Model):
     TRIP_COMPLETED = 'complete'
     TRIP_CANCELLED = 'cancelled'
     STATUSES = (
-        (BOOKING_IN_PROGRESS,'Booking in process'),
+        (BOOKING_IN_PROGRESS,'Booking in progress'),
         (TAXI_ARRIVED,'Arrived'),
         (BOOKING_STATUS , 'Booked'),
         (PASSENGER_ONBOAD , 'You are on board'),
@@ -64,11 +64,22 @@ class Taxi (models.Model):
     description = models.CharField(max_length=500, default='')
     taxi_fare = models.FloatField(default=0)
     duration = models.IntegerField(default=0)
+    pickup_time = models.DateTimeField(default=timezone.now)
+    pickup_date =models.CharField(max_length=500, default='')
+
 
     # payment_option = models.CharField(choices=PAYMENT_CHOICES, max_length=2,)
 
     def __str__(self):
         return f"{self.taxi_passenger.user.get_full_name()} - {self.taxi_passenger.phone_number}"
+
+class MyTrips (models.Model):
+    booked_passenger = models.ForeignKey(Passenger, on_delete=models.CASCADE)
+    booked_taxi = models.ForeignKey(Taxi, on_delete=models.CASCADE)
+    booking_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.booked_passenger.user.get_full_name() }'s Booking - {self.booking_time}"
 
 
 

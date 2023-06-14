@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'crispy_forms',
     'core.apps.CoreConfig',
     'fontawesomefree',
+    'datetimepicker',
+    'tempus_dominus',
+    'bootstrap_datepicker_plus',
   ]
 
 

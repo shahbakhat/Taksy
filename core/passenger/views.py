@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from core.passenger import forms
@@ -7,12 +7,13 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.conf import settings
 import stripe
-from core.models import Taxi, Passenger
+from core.models import Taxi, Passenger, MyTrips
 from django.utils import timezone
 import googlemaps
 from googlemaps import convert
 from googlemaps import distance_matrix
 from django.utils.text import slugify
+from .forms import TaxiBookingForm
 
 
 
@@ -66,66 +67,59 @@ def profile_page(request):
 
 # BOOKING TAXI
 
-
-
-
-@login_required(login_url="/login/?next=/passenger/book-a-taxi")
+@login_required(login_url="/login/?next=/passenger/")
 def book_taxi_page(request):
     current_customer = request.user.passenger
 
     if not request.user.passenger.stripe_payment_method_id:
         return redirect(reverse('passenger:payment-method'))
 
-    creating_booking = Taxi.objects.filter(taxi_passenger=current_customer, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS).last()
     phone_number = current_customer.phone_number
     taxi_passenger_payment_method = current_customer.stripe_card_last4
     description = Taxi.description
 
     if request.method == "POST":
-        pickup_form = forms.TaxiBookingForm(request.POST, instance=creating_booking)
+        pickup_form = TaxiBookingForm(request.POST)
         if request.POST.get('booking-info') == '1':
             if pickup_form.is_valid():
-                # Process the form data and save the booking
-                creating_booking = pickup_form.save(commit=False)
-                creating_booking.taxi_passenger = current_customer
+                # Create a new booking instance
+                creating_booking = Taxi(taxi_passenger=current_customer)
+
+                # Assign form data to the booking instance
+                creating_booking.pickup_address = pickup_form.cleaned_data['pickup_address']
+                creating_booking.pickup_lat = pickup_form.cleaned_data['pickup_lat']
+                creating_booking.pickup_lng = pickup_form.cleaned_data['pickup_lng']
+                creating_booking.dropoff_address = pickup_form.cleaned_data['dropoff_address']
+                creating_booking.dropoff_lat = pickup_form.cleaned_data['dropoff_lat']
+                creating_booking.dropoff_lng = pickup_form.cleaned_data['dropoff_lng']
+                creating_booking.pickup_time = pickup_form.cleaned_data['pickup_time']
 
                 # Generate a unique slug for the taxi based on its attributes
                 slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
                 creating_booking.slug = slug
 
-                creating_booking.save()
-
-                # Calculate the distance using Google Maps Distance Matrix API
-                gmaps = googlemaps.Client(key='AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio')
-                origins = f"{creating_booking.pickup_lat},{creating_booking.pickup_lng}"
-                destinations = f"{creating_booking.dropoff_lat},{creating_booking.dropoff_lng}"
-                result = gmaps.distance_matrix(origins, destinations, mode='driving')
-
-                # Extract the distance value from the API response
-                distance = result['rows'][0]['elements'][0]['distance']['value']
-                # Convert distance to kilometers (optional)
-                distance_km = distance / 1000
-
-                # Save the distance to the booking model
-                creating_booking.distance = distance_km
+                # Save the booking instance
                 creating_booking.save()
 
                 # Clear the form
-                pickup_form = forms.TaxiBookingForm()
+                pickup_form = TaxiBookingForm()
+
+                # Add success message
+                messages.success(request, "Booking created successfully!")
 
                 return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
             else:
-                pickup_form = forms.TaxiBookingForm(instance=creating_booking)
+                # Add error message
+                messages.error(request, "Invalid form data. Please check the form and try again.")
         elif request.POST.get('confirm-booking') == '2':
             return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
 
     else:
-        pickup_form = forms.TaxiBookingForm(instance=creating_booking)
+        pickup_form = TaxiBookingForm()
 
     show_trip_details = request.GET.get('show_trip_details') == 'true'
 
     return render(request, 'passenger/book-a-taxi.html', {
-        "taxi": creating_booking,
         "pickup_form": pickup_form,
         "phone_number": phone_number,
         "show_trip_details": show_trip_details,
@@ -134,14 +128,47 @@ def book_taxi_page(request):
     })
 
 
+@login_required(login_url="/login/?next=/passenger/")
+def cancel_trip(request, trip_id):
+    try:
+        trip = get_object_or_404(Taxi, id=trip_id, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS)
+        trip.delete()
+        messages.success(request, "Booking deleted successfully!")
+        return redirect(reverse('passenger:my-trips'))
+    except Taxi.DoesNotExist:
+        messages.error(request, "Booking not found or cannot be deleted.")
+    
+    return redirect(reverse('passenger:my-trips'))
 
 
 
 
 #  PASSENGER TRIPS
+
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
-    return render(request, 'passenger/my-trips.html',)
+    current_user_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger).order_by('pickup_time')
+
+    context = {
+        'trips': current_user_trips,
+    }
+
+    if not current_user_trips:
+        context['no_trips'] = True
+
+    return render(request, 'passenger/my-trips.html', context)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #Payment Method

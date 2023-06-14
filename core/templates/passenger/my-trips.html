@@ -2,7 +2,48 @@
 {% load bootstrap5 %}
 {% load static %}
 
-{% block content %}
+{% block main %}
+  <h1>My Trips</h1>
+  {% if no_trips %}
+    <p>No trips found.</p>
+  {% else %}
+    {% for trip in trips %}
+      <div class="card mt-4">
+        <div class="card-header">
+          Details
+        </div>
+        <div class="card-body p-4">
+          <p class="card-text"><strong>Pickup Location: </strong>{{ trip.pickup_address }}</p>
+          <p class="card-text"><strong>Destination: </strong>{{ trip.dropoff_address }}</p>
+          <p class="card-text"><strong>Pickup Time: </strong>{{ trip.pickup_time }}</p>
+          <p class="card-text"><strong>Distance: </strong>{{ trip.distance }}</p>
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ trip.id }}">
+            Cancel Trip
+          </button>
+        </div>
+      </div>
 
-
+      <!-- Cancel Trip Modal -->
+      <div class="modal fade" id="cancelModal{{ trip.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ trip.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="cancelModalLabel{{ trip.id }}">Confirm Cancellation</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Are you sure you want to cancel the trip?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <form action="{% url 'passenger:cancel-trip' trip.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Cancel Trip</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock %}
