@@ -3,32 +3,32 @@
 
 
 {% block main %}
-{% comment %} Basic Information {% endcomment %}
-
-<b class="text-secondary ">Basic Information </b>
+<b class="text-secondary">Basic Information</b>
 <div class="card bg-white mt-3 mb-3">
     <div class="card-body">
-        <form method="POST" enctype="multipart/form-data" >
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {% bootstrap_form  user_form %}
-            {% bootstrap_form  passenger_form %}
+            {% bootstrap_form user_form %}
+            {% bootstrap_form passenger_form %}
             <input type="hidden" name="action" value="update_profile">
-            <button type="submit" id="liveAlertBtn"  class="btn btn-warning">Save</button>
+            <button type="submit" id="liveAlertBtn" class="btn btn-warning">Save</button>
         </form>
     </div>
 </div>
+
 {% comment %} Change Password {% endcomment %}
 <b class="text-secondary">Change Password</b>
 <div class="card bg-white mt-2 mb-5">
     <div class="card-body">
-        <form method="POST" enctype="multipart/form-data" >
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {% bootstrap_form  password_form %}
+            {% bootstrap_form password_form %}
             <input type="hidden" name="action" value="update_password">
             <button type="submit" class="btn btn-warning">Save</button>
         </form>
     </div>
 </div>
+
 
 
 {% endblock %}

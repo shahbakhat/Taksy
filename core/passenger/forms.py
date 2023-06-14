@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from core.models import Passenger, Taxi
-from tempus_dominus.widgets import DateTimePicker
+from django.forms import DateInput, TimeInput
 
 
 class BasicUserForm(forms.ModelForm):
@@ -35,16 +35,24 @@ class TaxiBookingForm(forms.ModelForm):
     )
     taxi_size = forms.ChoiceField(
         choices=Taxi.TAXI_SIZE,
-        label='',
     )
     description = forms.CharField(
         label='',
         widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Write description or a message for the driver'}),
         required=False
+
+    )
+    pickup_date = forms.DateField(
+        label='Pickup Date',
+        widget=DateInput(attrs={'type': 'date'})
+    )
+    pickup_time = forms.TimeField(
+        label='Pickup Time',
+        widget=TimeInput(attrs={'type': 'time'})
     )
 
 
 
     class Meta:
         model = Taxi
-        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address', 'pickup_time', 'dropoff_lng', 'dropoff_lat', 'taxi_size', 'description')
+        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address','pickup_time','pickup_date', 'dropoff_lng', 'dropoff_lat', 'taxi_size', 'description')

@@ -66,6 +66,17 @@ def profile_page(request):
 
 # BOOKING TAXI
 
+
+def validate_address(address):
+    gmaps = googlemaps.Client(key='YOUR_API_KEY')  # Replace with your API key
+    geocode_result = gmaps.geocode(address)
+
+    if not geocode_result:
+        return False
+
+    location = geocode_result[0]['geometry']['location']
+    return location['lat'], location['lng']
+
 @login_required(login_url="/login/?next=/passenger/")
 def book_taxi_page(request):
     current_customer = request.user.passenger
@@ -80,24 +91,42 @@ def book_taxi_page(request):
         pickup_form = forms.TaxiBookingForm(request.POST)
         if request.POST.get('booking-info') == '1':
             if pickup_form.is_valid():
+                # Validate pickup address
+                pickup_address = pickup_form.cleaned_data['pickup_address']
+                pickup_latlng = validate_address(pickup_address)
+                if not pickup_latlng:
+                    messages.error(request, "Invalid pickup address. Please enter a valid address.")
+                    return redirect(reverse('passenger:book-a-taxi'))
+
+                # Validate dropoff address
+                dropoff_address = pickup_form.cleaned_data['dropoff_address']
+                dropoff_latlng = validate_address(dropoff_address)
+                if not dropoff_latlng:
+                    messages.error(request, "Invalid dropoff address. Please enter a valid address.")
+                    return redirect(reverse('passenger:book-a-taxi'))
+
                 # Create a new booking instance
                 creating_booking = Taxi(taxi_passenger=current_customer)
 
                 # Assign form data to the booking instance
-                creating_booking.pickup_address = pickup_form.cleaned_data['pickup_address']
-                creating_booking.pickup_lat = pickup_form.cleaned_data['pickup_lat']
-                creating_booking.pickup_lng = pickup_form.cleaned_data['pickup_lng']
-                creating_booking.dropoff_address = pickup_form.cleaned_data['dropoff_address']
-                creating_booking.dropoff_lat = pickup_form.cleaned_data['dropoff_lat']
-                creating_booking.dropoff_lng = pickup_form.cleaned_data['dropoff_lng']
-                creating_booking.pickup_time = pickup_form.cleaned_data['pickup_time']
+                creating_booking.pickup_address = pickup_address
+                creating_booking.pickup_lat = pickup_latlng[0]
+                creating_booking.pickup_lng = pickup_latlng[1]
+                creating_booking.dropoff_address = dropoff_address
+                creating_booking.dropoff_lat = dropoff_latlng[0]
+                creating_booking.dropoff_lng = dropoff_latlng[1]
+                pickup_date = pickup_form.cleaned_data['pickup_date']
+                pickup_time = pickup_form.cleaned_data['pickup_time'].strftime('%H:%M:%S')
+                pickup_datetime_str = f"{pickup_date} {pickup_time}"
+                pickup_datetime = datetime.fromisoformat(pickup_datetime_str)
+                creating_booking.pickup_time = pickup_datetime
 
                 # Generate a unique slug for the taxi based on its attributes
                 slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
                 creating_booking.slug = slug
 
                 # Calculate the distance using Google Maps Distance Matrix API
-                gmaps = googlemaps.Client(key='AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio')  # Replace with your API key
+                gmaps = googlemaps.Client(key='YOUR_API_KEY')  # Replace with your API key
                 origins = f"{creating_booking.pickup_lat},{creating_booking.pickup_lng}"
                 destinations = f"{creating_booking.dropoff_lat},{creating_booking.dropoff_lng}"
                 result = gmaps.distance_matrix(origins, destinations, mode='driving')
@@ -108,30 +137,30 @@ def book_taxi_page(request):
                 distance_km = distance / 1000
 
                 # Save the distance to the booking model
-                creating_booking.trip_distance = distance_km
+                creating_booking.distance = distance_km
 
                 # Retrieve the description from the Taxi model instance
                 creating_booking.description = pickup_form.cleaned_data['description']
                 # Save the current timestamp as the booking time
-                creating_booking.pickup_time = timezone.now()
+                creating_booking.pickup_time = datetime.now()
 
                 creating_booking.save()
-
-                # Clear the form
-                pickup_form = forms.TaxiBookingForm()
 
                 # Add success message
                 messages.success(request, "Booking created successfully!")
 
-                return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
+                return redirect(reverse('passenger:my-trips'))
             else:
-                # Add error message
-                messages.error(request, "Invalid form data. Please check the form and try again.")
+                # Add error messages for form fields with invalid data
+                for field, errors in pickup_form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"Invalid {field}: {error}")
+
         elif request.POST.get('confirm-booking') == '2':
             return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
 
     else:
-        pickup_form = forms.TaxiBookingForm()
+        pickup_form = forms.TaxiBookingForm()  # Create a new form instance on reload
 
     show_trip_details = request.GET.get('show_trip_details') == 'true'
 
@@ -141,6 +170,7 @@ def book_taxi_page(request):
         "show_trip_details": show_trip_details,
         "taxi_passenger_payment_method": taxi_passenger_payment_method,
     })
+
 
     
 #  PASSENGER TRIPS

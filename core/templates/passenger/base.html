@@ -3,40 +3,90 @@
 
 {% load static %}
 
+{% block head%}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+
 
 {% block content %}
+{% comment %} <script>
+    $('.alert').delay(2000).fadeOut('fast');
+</script> {% endcomment %}
 {% comment %} Path variable aliases {% endcomment %}
 {% url 'passenger:book-a-taxi' as book_taxi_url %}
 {% url 'passenger:my-trips' as my_trips_url  %}
 {% url 'passenger:profile' as profile_url  %}
 {% url 'passenger:payment-method' as payment_method_url  %}
-{% block head %}{% endblock %}
 
-<div class="container bg-light mb-4 mt-4 pt-3 pb-3">
+<div class="container shadow-lg bg-body-tertiary rounded bg-light mb-4 mt-4 pt-3 pb-3">
     <div class="row">
         <div class="col-lg-4">
            <div class="text-center">
-            <img src="{% if request.user.passenger.profile_photo %}{{ request.user.passenger.profile_photo.url }}{% else %}{% static 'images/avatar.png'%}{% endif %}" class="rounded-circle mb-2" alt="avatar-image" width="100" height="100">
-            <h4>{{ request.user.get_full_name }}</h4>
-            <p>{{ request.user.email }}</p>
-           </div>
+                <img src="{% if request.user.passenger.profile_photo %}{{ request.user.passenger.profile_photo.url }}{% else %}{% static 'images/avatar.png'%}{% endif %}" class="rounded-circle mb-2" alt="avatar-image" width="100" height="100">
+                <h4>{{ request.user.get_full_name }}</h4>
+                <p>{{ request.user.email }}</p>
+            </div>
 
-           <div class="list-group mt-5">
-                    <a href="{% url 'passenger:book-a-taxi' %}" class="list-group-item list-group-item-action{% if request.path == book_taxi_url %} active {% endif %}"  >Book a Taxi</a>
-                    <a href="{% url 'passenger:my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}">My Trips</a>
-                    <a href="{% url 'passenger:profile' %}" class="list-group-item list-group-item-action {% if request.path == profile_url %} active {% endif %} ">Profile Information</a>
-                    <a href="{% url 'passenger:payment-method' %}" class="list-group-item list-group-item-action {% if request.path == payment_method_url %} active {% endif %}">Payments Details</a>
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Successful</strong> {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+            <div class="list-group mt-5">
+                        <a href="{% url 'passenger:book-a-taxi' %}" class="list-group-item list-group-item-action{% if request.path == book_taxi_url %} active {% endif %}"  >Book a Taxi</a>
+                        <a href="{% url 'passenger:my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}">My Trips</a>
+                        <a href="{% url 'passenger:profile' %}" class="list-group-item list-group-item-action {% if request.path == profile_url %} active {% endif %} ">Profile Information</a>
+                        <a href="{% url 'passenger:payment-method' %}" class="list-group-item list-group-item-action {% if request.path == payment_method_url %} active {% endif %}">Payments Details</a>
+                        {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div id="successModal" class="modal fade show" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content bg-success">
+                                        <div class="modal-body">
+                                            <div class="alert" role="alert">
+                                                <strong>Successful</strong>: {{ message }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).ready(function() {
+                                    // Show the success modal
+                                    $('#successModal').modal('show');
+                    
+                                    // Automatically hide the success modal after 1 second
+                                    setTimeout(function() {
+                                        $('#successModal').modal('hide');
+                                    }, 2000);
+                                });
+                            </script>
+                        {% elif message.tags == 'error' %}
+                            <div id="errorModal" class="modal fade show" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content bg-danger">
+                                        <div class="modal-body">
+                                            <div class="alert" role="alert">
+                                                <strong>Error</strong>: {{ message }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).ready(function() {
+                                    // Show the error modal
+                                    $('#errorModal').modal('show');
+                    
+                                    // Automatically hide the error modal after 1 second
+                                    setTimeout(function() {
+                                        $('#errorModal').modal('hide');
+                                    }, 2000);
+                                });
+                            </script>
+                        {% endif %}
                     {% endfor %}
-                    {% endif %}
-                </div>
-        </div>
+                {% endif %}
 
+
+            </div>
+        </div>
         <div class="col-lg-8 mt-3">
             {% block main %}
 
@@ -44,6 +94,5 @@
         </div>
     </div>
 </div>
-
 
 {% endblock content %}
