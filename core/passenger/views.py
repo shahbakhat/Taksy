@@ -13,6 +13,8 @@ import googlemaps
 from googlemaps import convert
 from googlemaps import distance_matrix
 from django.utils.text import slugify
+from .forms import TaxiBookingForm
+from datetime import datetime
 
 
 
@@ -67,16 +69,6 @@ def profile_page(request):
 # BOOKING TAXI
 
 
-def validate_address(address):
-    gmaps = googlemaps.Client(key='YOUR_API_KEY')  # Replace with your API key
-    geocode_result = gmaps.geocode(address)
-
-    if not geocode_result:
-        return False
-
-    location = geocode_result[0]['geometry']['location']
-    return location['lat'], location['lng']
-
 @login_required(login_url="/login/?next=/passenger/")
 def book_taxi_page(request):
     current_customer = request.user.passenger
@@ -88,47 +80,33 @@ def book_taxi_page(request):
     taxi_passenger_payment_method = current_customer.stripe_card_last4
 
     if request.method == "POST":
-        pickup_form = forms.TaxiBookingForm(request.POST)
+        pickup_form = TaxiBookingForm(request.POST)
         if request.POST.get('booking-info') == '1':
             if pickup_form.is_valid():
                 # Validate pickup address
+                gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
                 pickup_address = pickup_form.cleaned_data['pickup_address']
-                pickup_latlng = validate_address(pickup_address)
-                if not pickup_latlng:
+                pickup_geocode_result = gmaps.geocode(pickup_address)
+                if not pickup_geocode_result:
                     messages.error(request, "Invalid pickup address. Please enter a valid address.")
                     return redirect(reverse('passenger:book-a-taxi'))
+                pickup_location = pickup_geocode_result[0]['geometry']['location']
+                pickup_lat = pickup_location['lat']
+                pickup_lng = pickup_location['lng']
 
                 # Validate dropoff address
                 dropoff_address = pickup_form.cleaned_data['dropoff_address']
-                dropoff_latlng = validate_address(dropoff_address)
-                if not dropoff_latlng:
+                dropoff_geocode_result = gmaps.geocode(dropoff_address)
+                if not dropoff_geocode_result:
                     messages.error(request, "Invalid dropoff address. Please enter a valid address.")
                     return redirect(reverse('passenger:book-a-taxi'))
-
-                # Create a new booking instance
-                creating_booking = Taxi(taxi_passenger=current_customer)
-
-                # Assign form data to the booking instance
-                creating_booking.pickup_address = pickup_address
-                creating_booking.pickup_lat = pickup_latlng[0]
-                creating_booking.pickup_lng = pickup_latlng[1]
-                creating_booking.dropoff_address = dropoff_address
-                creating_booking.dropoff_lat = dropoff_latlng[0]
-                creating_booking.dropoff_lng = dropoff_latlng[1]
-                pickup_date = pickup_form.cleaned_data['pickup_date']
-                pickup_time = pickup_form.cleaned_data['pickup_time'].strftime('%H:%M:%S')
-                pickup_datetime_str = f"{pickup_date} {pickup_time}"
-                pickup_datetime = datetime.fromisoformat(pickup_datetime_str)
-                creating_booking.pickup_time = pickup_datetime
-
-                # Generate a unique slug for the taxi based on its attributes
-                slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
-                creating_booking.slug = slug
+                dropoff_location = dropoff_geocode_result[0]['geometry']['location']
+                dropoff_lat = dropoff_location['lat']
+                dropoff_lng = dropoff_location['lng']
 
                 # Calculate the distance using Google Maps Distance Matrix API
-                gmaps = googlemaps.Client(key='YOUR_API_KEY')  # Replace with your API key
-                origins = f"{creating_booking.pickup_lat},{creating_booking.pickup_lng}"
-                destinations = f"{creating_booking.dropoff_lat},{creating_booking.dropoff_lng}"
+                origins = f"{pickup_lat},{pickup_lng}"
+                destinations = f"{dropoff_lat},{dropoff_lng}"
                 result = gmaps.distance_matrix(origins, destinations, mode='driving')
 
                 # Extract the distance value from the API response
@@ -136,15 +114,35 @@ def book_taxi_page(request):
                 # Convert distance to kilometers (optional)
                 distance_km = distance / 1000
 
-                # Save the distance to the booking model
-                creating_booking.distance = distance_km
+                # Create a new booking instance
+                creating_booking = Taxi(
+                taxi_passenger=current_customer,
+                taxi_passenger_phone_number=phone_number,
+                taxi_passneger_payment_method=taxi_passenger_payment_method,
+                pickup_address=pickup_address,
+                pickup_lat=pickup_lat,
+                pickup_lng=pickup_lng,
+                dropoff_address=dropoff_address,
+                dropoff_lat=dropoff_lat,
+                dropoff_lng=dropoff_lng,
+                trip_distance=distance_km,
+                description=pickup_form.cleaned_data['description'],
+                pickup_datetime=datetime.now(),
+                taxi_booking_status=Taxi.TRIP_BOOKED  # Set the booking status to 'Booking in progress'
+            )
 
-                # Retrieve the description from the Taxi model instance
-                creating_booking.description = pickup_form.cleaned_data['description']
-                # Save the current timestamp as the booking time
-                creating_booking.pickup_time = datetime.now()
+                # Generate a unique slug for the taxi based on its attributes
+                slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
+                creating_booking.slug = slug
 
                 creating_booking.save()
+
+                # Create MyTrips instance
+                my_trip = MyTrips(
+                    booked_passenger=current_customer,
+                    booked_taxi=creating_booking,
+                )
+                my_trip.save()
 
                 # Add success message
                 messages.success(request, "Booking created successfully!")
@@ -160,7 +158,7 @@ def book_taxi_page(request):
             return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
 
     else:
-        pickup_form = forms.TaxiBookingForm()  # Create a new form instance on reload
+        pickup_form = TaxiBookingForm()  # Create a new form instance on reload
 
     show_trip_details = request.GET.get('show_trip_details') == 'true'
 
@@ -170,44 +168,41 @@ def book_taxi_page(request):
         "show_trip_details": show_trip_details,
         "taxi_passenger_payment_method": taxi_passenger_payment_method,
     })
+# CANCEL THE TRIP LOGIC
+@login_required(login_url="/login/?next=/passenger/")
 
+def cancel_trip(request, trip_id):
+    try:
+        trip = Taxi.objects.get(id=trip_id)
+        trip.taxi_booking_status = Taxi.TRIP_CANCELLED  # Update the booking status to 'Trip Cancelled'
+        trip.save()
 
-    
+        my_trip = MyTrips.objects.get(booked_taxi=trip)
+        my_trip.save()
+
+        messages.success(request, "Trip cancelled successfully!")
+    except Taxi.DoesNotExist:
+        messages.error(request, "Trip not found.")
+
+    return redirect('passenger:my-trips')
+
 #  PASSENGER TRIPS
-
+@login_required(login_url="/login/?next=/passenger/")
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
-    current_user_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger).order_by('pickup_time')
+    booked_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_BOOKED).order_by('pickup_datetime')
+    canceled_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_CANCELLED).order_by('-cancellation_time')
+
+    trips = list(booked_trips) + list(canceled_trips)
 
     context = {
-        'trips': current_user_trips,
+        'trips': trips,
     }
 
-    if not current_user_trips:
+    if not trips:
         context['no_trips'] = True
 
     return render(request, 'passenger/my-trips.html', context)
-
-@login_required(login_url="/login/?next=/passenger/")
-def cancel_trip(request, trip_id):
-    try:
-        trip = get_object_or_404(Taxi, id=trip_id, taxi_booking_status=Taxi.BOOKING_IN_PROGRESS)
-        trip.delete()
-        messages.success(request, "Booking deleted successfully!")
-        return redirect(reverse('passenger:my-trips'))
-    except Taxi.DoesNotExist:
-        messages.error(request, "Booking not found or cannot be deleted.")
-    
-    return redirect(reverse('passenger:my-trips'))
-
-
-
-
-
-
-
-
-
 
 
 

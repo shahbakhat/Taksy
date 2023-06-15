@@ -8,22 +8,42 @@
     <p>No trips found.</p>
   {% else %}
     {% for trip in trips %}
-      <div class="card mt-4">
+    {% if trip.taxi_booking_status == 'booked' %}
+      <div class="card ">
         <div class="card-header">
           Details
+          <!-- Showing the relevant badge if trip is booked or cancelled -->
+          <span class="badge float-end bg-success text-bg-info"> {{ trip.taxi_booking_status }}</span>
+
         </div>
+        <!--If the trip is booked it show all the details of the trip otherwise if cancelled just show minor details-->
         <div class="card-body p-4">
           <p class="card-text"><strong>Pickup Location: </strong>{{ trip.pickup_address }}</p>
           <p class="card-text"><strong>Destination: </strong>{{ trip.dropoff_address }}</p>
-          <p class="card-text"><strong>Pickup Time: </strong>{{ trip.pickup_time }}</p>
+          <p class="card-text"><strong>Pickup Time: </strong>{{ trip.pickup_datetime }}</p>
           <p class="card-text"><strong>Distance: </strong>{{ trip.trip_distance }}</p>
           <p class="card-text"><strong>Description: </strong>{{ trip.description }}</p>
-          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ trip.id }}">
-            Cancel Trip
-          </button>
+          <!-- shwoing relevant times according to the booking status -->
+          <span class="fw-light float-end" style="font-size:12px;color:grey;"> Booked at: {{ trip.booking_time}}</span>
+          <!-- If trip is cancelled the cancel button is disabled -->
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ trip.id }}">
+              Cancel Trip
+            </button>
         </div>
       </div>
+      {% elif trip.taxi_booking_status == 'cancelled' %}
+      <div class="col-sm-10 mb-3 mt-3">
+    <div class="alert alert-danger" role="alert">
+      <div>
+        <span class="badge float-end bg-danger text-bg-info"> {{ trip.taxi_booking_status }}</span>
 
+          <p class="card-text"><strong> {{ trip.pickup_address }}</strong><p>To</p><strong> {{ trip.dropoff_address }}</strong></p>
+          <!-- shwoing relevant times according to the booking status -->
+          <span class="fw-light float-end" style="font-size:12px;color:grey;"> Cancelled at: {{ trip.cancellation_time}}</span>
+      </div>
+    </div>
+  </div>
+      {% endif %}
       <!-- Cancel Trip Modal -->
       <div class="modal fade" id="cancelModal{{ trip.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ trip.id }}" aria-hidden="true">
         <div class="modal-dialog">

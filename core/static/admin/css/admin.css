@@ -1,0 +1,83 @@
+
+body {
+  font-family: 'Lato', Arial, sans-serif;
+}
+
+
+  
+  /* Modernize the header */
+  #header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+  }
+  
+  #header h1 {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  /* Modernize the sidebar */
+  #sidebar {
+    background-color: #555;
+    color: #fff;
+    padding: 10px;
+  }
+  
+  #sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  #sidebar ul li {
+    margin-bottom: 5px;
+  }
+  
+  #sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  #sidebar ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Modernize the content area */
+  .content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content h2 {
+    font-size: 20px;
+    margin-top: 0;
+  }
+  
+  .content p {
+    margin-bottom: 10px;
+  }
+  
+  /* Modernize form inputs */
+  input[type="text"],
+  input[type="password"],
+  textarea {
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 3px;
+  }
+  
+  button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #555;
+  }
+  

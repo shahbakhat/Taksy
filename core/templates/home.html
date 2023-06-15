@@ -1,37 +1,33 @@
 {% extends 'base.html' %}
-{% block extrahead %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.js" />
-{% endblock %}
+
 
 {% block content %}
-
-<section class="section-welcome">
-   <div class="clo-lg-12 text-center mt-5 mb-5">
-      <h1 class="text-uppercase">welcome to taxipal</h1>
-   </div>
-</section>
-<div class=" container">
-   <div class="row">
-      <div class="col-lg-6 mb-4">
-         <div class="card">
-            <div class="card-body">
-               <h5 class="card-title">Passenger</h5>
-               <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-               <a href="{% url 'passenger:home' %}" class="btn btn-warning">Login as a Passenger</a>
+    <section class="section-welcome">
+        <div class="clo-lg-12 text-center mt-5 mb-5">
+            <h1 class="text-uppercase fade-in">Welcome to Taksy</h1>
+        </div>
+    </section>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">Passenger</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <a href="{% url 'passenger:home' %}" class="btn btn-warning">Login as a Passenger</a>
+                    </div>
+                </div>
             </div>
-         </div>
-      </div>
-      <div class="col-lg-6 mb-4">
-         <div class="card">
-            <div class="card-body">
-               <h5 class="card-title">Driver</h5>
-               <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-               <a href="{% url 'driver:home' %}" class="btn btn-warning ">Login as a Driver</a>
+            <div class="col-lg-6 mb-4">
+                <div class="card fade-in">
+                    <div class="card-body">
+                        <h5 class="card-title">Driver</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        {% comment %} <!--{% url 'driver:home' %}--> {% endcomment %}
+                        <a href="" class="btn btn-warning">Login as a Driver</a>
+                    </div>
+                </div>
             </div>
-         </div>
-      </div>
-   </div>
-</div>
-
+        </div>
+    </div>
 {% endblock %}
-

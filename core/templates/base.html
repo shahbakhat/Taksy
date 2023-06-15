@@ -17,7 +17,7 @@
 
 <body>
       <nav id="navbar-container"  class="navbar  navbar-light{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %}{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %} bg-warning">
-        <a class="navbar-brand fs-4 fw-bolder ms-5" id="nav-logo" href="/">Taxi Pal</a>
+        <a class="navbar-brand fs-4 fw-bolder ms-5" id="nav-logo" href="/">Taksy</a>
         {% if not request.user.is_authenticated %}
         {% else %}
          <form action="form-inline">

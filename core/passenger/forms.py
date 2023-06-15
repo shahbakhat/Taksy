@@ -42,17 +42,14 @@ class TaxiBookingForm(forms.ModelForm):
         required=False
 
     )
-    pickup_date = forms.DateField(
-        label='Pickup Date',
-        widget=DateInput(attrs={'type': 'date'})
-    )
-    pickup_time = forms.TimeField(
-        label='Pickup Time',
-        widget=TimeInput(attrs={'type': 'time'})
+    pickup_datetime = forms.DateTimeField(
+        label='Pickup Date and Time',
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%d-%m-%YT%H:%M'],
     )
 
 
 
     class Meta:
         model = Taxi
-        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address','pickup_time','pickup_date', 'dropoff_lng', 'dropoff_lat', 'taxi_size', 'description')
+        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address','pickup_datetime', 'dropoff_lng', 'dropoff_lat', 'taxi_size', 'description')

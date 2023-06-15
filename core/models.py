@@ -11,7 +11,7 @@ from django.utils import timezone
 # Create your models here.
 class Passenger(models.Model):
     user = models.OneToOneField(User , on_delete=models.CASCADE)
-    profile_photo = models.ImageField(upload_to='passenger/pfoile-photos/', blank=True, null=True)
+    profile_photo = models.ImageField(upload_to='passenger/static/pfoile-photos/', blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True)
     stripe_customer_id = models.CharField(max_length=225, blank=True)
     stripe_payment_method_id= models.CharField(max_length=225, blank=True)
@@ -36,7 +36,7 @@ class Taxi (models.Model):
         (EIGHT_SEATER ,' 8 Seater'),
     )
     BOOKING_IN_PROGRESS = 'booking in proccess'
-    BOOKING_STATUS = 'booked'
+    TRIP_BOOKED = 'booked'
     TAXI_ARRIVED = 'arrived'
     PASSENGER_ONBOAD = 'onboard'
     TRIP_COMPLETED = 'complete'
@@ -44,10 +44,10 @@ class Taxi (models.Model):
     STATUSES = (
         (BOOKING_IN_PROGRESS,'Booking in progress'),
         (TAXI_ARRIVED,'Arrived'),
-        (BOOKING_STATUS , 'Booked'),
-        (PASSENGER_ONBOAD , 'You are on board'),
-        (TRIP_CANCELLED , 'Trip has been canceled'),
-        (TRIP_COMPLETED , 'Trip has been completed')
+        (TRIP_BOOKED , 'Booked'),
+        (PASSENGER_ONBOAD , 'Onboard'),
+        (TRIP_CANCELLED , 'Cancelled'),
+        (TRIP_COMPLETED , 'Completed')
 
     )
 #Taxi booking details fields
@@ -59,25 +59,25 @@ class Taxi (models.Model):
     dropoff_lng = models.FloatField(default=0.0, null = True)
     dropoff_lat = models.FloatField(default=0.0, null = True)
     trip_price = models.FloatField(default=0, null = True)
-    taxi_booking_status = models.CharField(max_length=100, choices=STATUSES, default=BOOKING_IN_PROGRESS)
+    taxi_booking_status = models.CharField(max_length=100, choices=STATUSES)
     trip_distance = models.FloatField(default=0, null=True)
     description = models.CharField(max_length=500, default='')
     trip_fare = models.FloatField(default=0)
     duration = models.IntegerField(default=0)
-    pickup_time = models.DateTimeField(default=timezone.now)
-    pickup_date =models.CharField(max_length=500, default='')
+    pickup_datetime = models.DateTimeField(default=timezone.now)
+    trip_distance = models.CharField(max_length=255, default=None)
+    booking_time = models.DateTimeField(default=timezone.now)
+    cancellation_time = models.DateTimeField(default=timezone.now)
 
 
     def __str__(self):
-        return f"{self.taxi_passenger.user.get_full_name()} - {self.taxi_passenger.phone_number}"
+        return f"{self.taxi_passenger.user.get_full_name()}'s Booking is - {self.taxi_booking_status} - From '{self.pickup_address}' |--> '{self.dropoff_address}' @ Date and time :[{self.pickup_datetime}]'"
 
-class MyTrips (models.Model):
+class MyTrips(models.Model):
     booked_passenger = models.ForeignKey(Passenger, on_delete=models.CASCADE)
     booked_taxi = models.ForeignKey(Taxi, on_delete=models.CASCADE)
-    booking_time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.booked_passenger.user.get_full_name() }'s Booking - {self.booking_time}"
-
+        return f"{self.booked_passenger.user.get_full_name()}'s Booking - {self.booked_taxi}"
 
 

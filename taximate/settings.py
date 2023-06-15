@@ -133,7 +133,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static/']  # routes to search for static files
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+
+
 
 
 # For Media Upload
@@ -153,3 +159,4 @@ DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
 
 STRIPE_API_PUBLIC_KEY = "pk_test_51NAzY8EsGHfqk8451iqCC67T8GcG6tDPK8A66XDilpL5mLpc9ISAm17evseykIO3At4Z44Pcsh0VnLb9JrbDfegN00WWmYU9Dj"
 STRIPE_SECRET_KEY = "sk_test_51NAzY8EsGHfqk845BrulOm6gcsGtekVatYuxp4FGCuRGYz9mUTrw8G40peyhquh2TaE2cS153ekQ2PuQqZAr1F5D008Gm7AdBV"
+GOOGLE_MAPS_API_KEY = "AIzaSyBFCTNphiI-IJWaiJft0bOPUPM7fFRGoKc"
