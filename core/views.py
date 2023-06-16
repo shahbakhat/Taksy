@@ -3,6 +3,8 @@ from django .contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render
+from .forms import DriverSignUpForm,PassenegerSignUpForm
+
 
 
 from . import forms
@@ -11,22 +13,36 @@ from . import forms
 def home(request):
     return render(request, 'home.html')
 
-def sign_up(request):  # sourcery skip: extract-method
-    form = forms.SignUpForm()
+def driverHome(request):
+    return render(request, 'driver/home.html')
+
+def sign_up(request):
+    passenger_form = forms.PassenegerSignUpForm()
+    driver_form = forms.DriverSignUpForm()
 
     if request.method == "POST":
-        form = forms.SignUpForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email').lower()
-            user = form.save(commit=False)
-            user.username = email
-            user.save()
+        if 'passenger' in request.POST:
+            form = forms.PassenegerSignUpForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email').lower()
+                user = form.save(commit=False)
+                user.username = email
+                user.save()
 
-            login(request,user)
-            return redirect('/')
-    else:
-        form = forms.SignUpForm()
+                login(request, user)
+                return redirect('/')
+        elif 'driver' in request.POST:
+            form = forms.DriverSignUpForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email').lower()
+                user = form.save(commit=False)
+                user.username = email
+                user.save()
 
-    return render(request, 'sign-up.html', {'form': form
-                                            })
+                login(request, user)
+                return redirect('/')
 
+    return render(request, 'sign-up.html', {
+        'passenger_form': passenger_form,
+        'driver_form': driver_form,
+    })

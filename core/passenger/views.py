@@ -25,7 +25,7 @@ from datetime import datetime
 def home(request):
     return redirect(reverse('passenger:profile'))
 
-#  PROFILE PAGE
+
 @login_required(login_url="/login/?next=/passenger/")
 def profile_page(request):
     user_form = forms.BasicUserForm(instance=request.user)
@@ -34,36 +34,32 @@ def profile_page(request):
 
     if request.method == "POST":
         if request.POST.get('action') == 'update_profile':
+            user_form = forms.BasicUserForm(request.POST, instance=request.user)
+            passenger_form = forms.BasicCustomerForm(request.POST, request.FILES, instance=request.user.passenger)
+            if user_form.is_valid() and passenger_form.is_valid():
+                user_form.save()
+                passenger_form.save()
 
-            user_form = forms.BasicUserForm(
-                request.POST, instance=request.user)
-            passenger_form = forms.BasicCustomerForm(
-                request.POST, request.FILES, instance=request.user.passenger)
-
-        if user_form.is_valid() and passenger_form.is_valid():
-            user_form.save()
-            passenger_form.save()
-
-            # Profile update toast
-            messages.success(request, 'profile updated successfully.')
-            return redirect(reverse('passenger:profile'))
+                # Profile update toast
+                messages.success(request, 'Profile updated successfully.')
+                return redirect(reverse('passenger:profile'))
 
         elif request.POST.get('action') == 'update_password':
             password_form = PasswordChangeForm(request.user, request.POST)
+            
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)
 
-
-                messages.success(request, 'password updated successfully.')
+                # Password update toast
+                messages.success(request, 'Password updated successfully.')
                 return redirect(reverse('passenger:profile'))
 
-    return render(request, 'passenger/profile.html',
-                  {"user_form": user_form,
-                   "passenger_form": passenger_form,
-                   "password_form": password_form,
-                   }
-                  )
+    return render(request, 'passenger/profile.html', {
+        "user_form": user_form,
+        "passenger_form": passenger_form,
+        "password_form": password_form,
+    })
 
 
 # BOOKING TAXI
@@ -169,7 +165,6 @@ def book_taxi_page(request):
         "taxi_passenger_payment_method": taxi_passenger_payment_method,
     })
 # CANCEL THE TRIP LOGIC
-@login_required(login_url="/login/?next=/passenger/")
 
 def cancel_trip(request, trip_id):
     try:
@@ -187,7 +182,6 @@ def cancel_trip(request, trip_id):
     return redirect('passenger:my-trips')
 
 #  PASSENGER TRIPS
-@login_required(login_url="/login/?next=/passenger/")
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
     booked_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_BOOKED).order_by('pickup_datetime')

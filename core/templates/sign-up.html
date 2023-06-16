@@ -1,34 +1,44 @@
 {% extends 'base.html' %}
 {% load bootstrap5 %}
-{% block content %}
 
+{% block content %}
 <div class="container-fluid mt-5">
     <div class="row justify-content-center">
-       <div class="col-lg-4">
-          <div class="card">
-             <div class="card-body">
-               {% if  not request.GET.next == '/driver/' %}
-                <h4 class="text-center text-uppercase mb-3">
-                    <b>passenger</b>
-                     {% else %}
-                <h4 class="text-center text-uppercase mb-3">
-                     <b>driver</b>
-                     {% endif %}
-                </h4>
-                <form method="POST" action="/sign-up/">
-                  {% csrf_token %}
-                  {% bootstrap_form form %}
-                  <div class="d-grid gap-2">
-                   <button class="btn btn-warning btn-block" type="submit" >Sign Up</button>
-                  </div>
-                   <p class="text-center mt-3">Already have an account?
-                    <a href="/login/?next={{request.GET.next}}">Log In</a>
-                   </p>
-                </form>
-             </div>
-          </div>
-       </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if not request.GET.next == '/driver/' %}
+                        <h4 class="text-center text-uppercase mb-3">
+                            <b>Passenger</b>
+                        </h4>
+                        <form method="POST" >
+                            {% csrf_token %}
+                            {% bootstrap_form passenger_form %}
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning btn-block" type="submit">Sign Up</button>
+                            </div>
+                            <p class="text-center mt-3">Already have an account?
+                                <a href="{% url 'login' %}?next={{ request.GET.next }}">Log In</a>
+                            </p>
+                        </form>
+                    {% else %}
+                        <h4 class="text-center text-uppercase mb-3">
+                            <b>Driver</b>
+                        </h4>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {% bootstrap_form driver_form %}
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-warning btn-block" type="submit">Sign Up</button>
+                            </div>
+                            <p class="text-center mt-3">Already have an account?
+                                <a href="{% url 'login' %}?next={{ request.GET.next }}">Log In</a>
+                            </p>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
- </div>
-
+</div>
 {% endblock %}
