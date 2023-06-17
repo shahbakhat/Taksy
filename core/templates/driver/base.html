@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Driver| Taksy</title>
+
+    {% load bootstrap5  %} {% bootstrap_css %} {% bootstrap_javascript %}
+    {% load static %}
+
+<script>
+    let vh = window.innerHeight * 0 01;
+    document.getElementById.style.setProperty('--vh' , `${vh}px`);
+</script>
+
+<style>
+    #content{
+        height: calc(var(--vh,1vh) *100);
+    }
+</style>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+{% block content %}
+
+{% endblock %}
+
+</body>
+
+</html>

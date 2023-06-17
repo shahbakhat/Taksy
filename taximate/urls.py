@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from core import views
 from core.passenger import views as passenger_views
-from core.driver import views as driver_views
+from core.driver import views as driver_views, apis as driver_apis
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -25,6 +25,9 @@ urlpatterns = [
     # Driver views
     path('driver/', include(([
         path('', driver_views.home, name="home"),
+        path('api/available-trips-api/available/', driver_apis.available_trips_api_page, name="available-trips-api"),
+        path('trips/available/', driver_views.available_trips_page, name="available-trips"),
+        path('trips/available/my-jobs/', driver_views.my_jobs_page, name="my-jobs"),
     ], 'driver'))),
 ]
 

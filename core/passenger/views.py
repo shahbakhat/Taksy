@@ -15,7 +15,7 @@ from googlemaps import distance_matrix
 from django.utils.text import slugify
 from .forms import TaxiBookingForm
 from datetime import datetime
-
+from django.utils.timezone import now
 
 
 
@@ -112,24 +112,25 @@ def book_taxi_page(request):
 
                 # Create a new booking instance
                 creating_booking = Taxi(
-                taxi_passenger=current_customer,
-                taxi_passenger_phone_number=phone_number,
-                taxi_passneger_payment_method=taxi_passenger_payment_method,
-                pickup_address=pickup_address,
-                pickup_lat=pickup_lat,
-                pickup_lng=pickup_lng,
-                dropoff_address=dropoff_address,
-                dropoff_lat=dropoff_lat,
-                dropoff_lng=dropoff_lng,
-                trip_distance=distance_km,
-                description=pickup_form.cleaned_data['description'],
-                pickup_datetime=datetime.now(),
-                taxi_booking_status=Taxi.TRIP_BOOKED  # Set the booking status to 'Booking in progress'
-            )
+                    taxi_passenger=current_customer,
+                    taxi_passenger_phone_number=phone_number,
+                    taxi_passneger_payment_method=taxi_passenger_payment_method,
+                    pickup_address=pickup_address,
+                    pickup_lat=pickup_lat,
+                    pickup_lng=pickup_lng,
+                    dropoff_address=dropoff_address,
+                    dropoff_lat=dropoff_lat,
+                    dropoff_lng=dropoff_lng,
+                    trip_distance=distance_km,
+                    description=pickup_form.cleaned_data['description'],
+                    pickup_datetime=datetime.now(),
+                    taxi_booking_status=Taxi.TRIP_BOOKED  # Set the booking status to 'Booking in progress'
+                )
 
                 # Generate a unique slug for the taxi based on its attributes
-                slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
-                creating_booking.slug = slug
+                base_slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
+                unique_slug = base_slug + '-' + str(now().timestamp()).replace('.', '')
+                creating_booking.slug = unique_slug
 
                 creating_booking.save()
 

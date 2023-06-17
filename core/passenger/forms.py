@@ -23,6 +23,7 @@ class TaxiBookingForm(forms.ModelForm):
         label='',
         widget=forms.TextInput(attrs={
             'placeholder': 'Where are you?',
+            'class': 'form-control'
         })
     )
     dropoff_address = forms.CharField(
@@ -31,25 +32,24 @@ class TaxiBookingForm(forms.ModelForm):
         label='',
         widget=forms.TextInput(attrs={
             'placeholder': 'Where do you want to go?',
+            'class': 'form-control'
         })
     )
     taxi_size = forms.ChoiceField(
         choices=Taxi.TAXI_SIZE,
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
     description = forms.CharField(
         label='',
-        widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Write description or a message for the driver'}),
+        widget=forms.Textarea(attrs={'rows': 2, 'cols': 20, 'placeholder': 'Write description or a message for the driver', 'class': 'form-control'}),
         required=False
-
     )
     pickup_datetime = forms.DateTimeField(
         label='Pickup Date and Time',
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
         input_formats=['%d-%m-%YT%H:%M'],
     )
 
-
-
     class Meta:
         model = Taxi
-        fields = ('pickup_address', 'pickup_lng', 'pickup_lat', 'dropoff_address','pickup_datetime', 'dropoff_lng', 'dropoff_lat', 'taxi_size', 'description')
+        fields = ['pickup_address', 'dropoff_address', 'taxi_size', 'description', 'pickup_datetime']

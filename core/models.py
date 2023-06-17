@@ -121,7 +121,7 @@ class Taxi (models.Model):
     dropoff_lat = models.FloatField(default=0.0, null = True)
     trip_price = models.FloatField(default=0, null = True)
     taxi_booking_status = models.CharField(max_length=100, choices=STATUSES)
-    trip_distance = models.FloatField(default=0, null=True)
+    trip_distance = models.DecimalField(default=0, null=True)
     description = models.CharField(max_length=500, default='')
     trip_fare = models.FloatField(default=0)
     duration = models.IntegerField(default=0)

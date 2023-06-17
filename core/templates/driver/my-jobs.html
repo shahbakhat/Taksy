@@ -1,0 +1,34 @@
+{% extends 'driver/base.html' %}
+
+{% block content %}
+ 
+  {% if available_trips %}
+  <span class="badge position-relative">
+My Jobs
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ available_trips|length }}
+      <span class="visually-hidden">unread messages</span>
+    </span>
+  </span>
+    <div class="row">
+      {% for trip in available_trips %}
+        <div class="card mb-4 col-4 center">
+          <div class="card-header">
+            <h5 class="card-title text-center fw-bold">{{ trip.pickup_datetime }}</h5>
+          </div>
+          <div class="card-body">
+            <p class="card-text"><strong>From: </strong>{{ trip.pickup_address }}</p>
+            <p class="card-text"><strong>To: </strong>{{ trip.dropoff_address }}</p>
+            <p class="card-text fs-2"><strong>Distance: </strong>{{ trip.trip_distance }} Km</p>
+            <p class="card-text"><strong>Description: </strong>{{ trip.description }}</p>
+            <button type="button" class="btn float-end btn-lg btn-success">
+              Accept
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No available trips.</p>
+  {% endif %}
+{% endblock %}

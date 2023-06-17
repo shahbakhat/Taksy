@@ -1,0 +1,76 @@
+{% extends 'driver/base.html' %}
+
+{% block head %}
+<script
+   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANA9ozNn4mr7ljTh97_4jgeeryhi5tsio&callback=initMap&libraries=places&v=weekly"
+   defer
+   ></script>
+
+<script>
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 53.349805, lng: -6.26031 }, // Centered on Dublin, Ireland
+            zoom: 13,
+            mapTypeControl: true, // Enable map type controls
+            mapTypeControlOptions: {
+                style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR, // Position the map type controls horizontally
+                position: google.maps.ControlPosition.TOP_RIGHT // Position the map type controls at the top right corner
+            },
+        });
+
+        fetch("{% url 'driver:available-trips-api' %}")
+            .then(response => response.json())
+            .then(json => {
+                if (json.available_trips && json.available_trips.length > 0) {
+                    for (let i = 0; i < json.available_trips.length; i++) {
+                        const trip = json.available_trips[i];
+                        const pickupPosition = { lat: trip.pickup_lat, lng: trip.pickup_lng };
+                        const dropoffPosition = { lat: trip.dropoff_lat, lng: trip.dropoff_lng };
+
+                        // Add pickup marker
+                        const pickupMarker = new google.maps.Marker({ position: pickupPosition, map: map });
+                        new google.maps.InfoWindow({
+                            content: "<small><b>" + trip.name + "</b></small><br/><small>" + trip.distance + "Km</small>"
+                        }).open(map, pickupMarker);
+
+                        // Add dropoff marker
+                        const dropoffMarker = new google.maps.Marker({ position: dropoffPosition, map: map });
+                        new google.maps.InfoWindow({
+                            content: "<small><b>Drop-off Location</b></small><br/><small>" + trip.dropoff_address + "</small>"
+                        }).open(map, dropoffMarker);
+
+                        // Draw route
+                        const directionsService = new google.maps.DirectionsService();
+                        const directionsRenderer = new google.maps.DirectionsRenderer({ map: map });
+                        const request = {
+                            origin: pickupPosition,
+                            destination: dropoffPosition,
+                            travelMode: google.maps.TravelMode.DRIVING
+                        };
+
+                        directionsService.route(request, (result, status) => {
+                            if (status === google.maps.DirectionsStatus.OK) {
+                                directionsRenderer.setDirections(result);
+                            } else {
+                                console.error("Error retrieving directions:", status);
+                            }
+                        });
+                    }
+                } else {
+                    console.log("No available trips found in the API response.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex flex-column h-100" style="padding-bottom: 60px; height: 100vh;">
+        <div id="map" style="height: calc(100vh - 60px);"></div>
+    </div>
+
+    {% include 'driver/bottom_tabs.html' %}
+{% endblock %}

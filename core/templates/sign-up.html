@@ -11,9 +11,9 @@
                         <h4 class="text-center text-uppercase mb-3">
                             <b>Passenger</b>
                         </h4>
-                        <form method="POST" >
+                        <form method="POST" action="{% url 'sign-up'%}" >
                             {% csrf_token %}
-                            {% bootstrap_form passenger_form %}
+                            {% bootstrap_form passenger_signup_form %}
                             <div class="d-grid gap-2">
                                 <button class="btn btn-warning btn-block" type="submit">Sign Up</button>
                             </div>
@@ -25,7 +25,7 @@
                         <h4 class="text-center text-uppercase mb-3">
                             <b>Driver</b>
                         </h4>
-                        <form method="POST">
+                        <form method="POST" action="{% url 'sign-up'%}">
                             {% csrf_token %}
                             {% bootstrap_form driver_form %}
                             <div class="d-grid gap-2">
