@@ -15,7 +15,7 @@ def home(request):
     return render(request, 'home.html')
 
 def driverHome(request):
-    return render(request, 'driver/home.html')
+    return render(request, 'driver/driver-home.html')
 
 
 import logging

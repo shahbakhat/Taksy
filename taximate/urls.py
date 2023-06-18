@@ -27,8 +27,9 @@ urlpatterns = [
     path('driver/', include(([
         path('', driver_views.home, name="driver-home"),
         path('api/available-trips-api/available/', driver_apis.available_trips_api_page, name="driver-available-trips-api"),
-        path('trips/available/', driver_views.available_trips_page, name="driver-available-trips"),
-        path('trips/available/my-jobs/', driver_views.my_jobs_page, name="driver-my-jobs"),
+        path('trips/driver-home-page/', driver_views.driver_home_page, name="driver_home_page"),
+        path('trips/driver/trips-view', driver_views.driver_trip_view, name="driver-trip-view"),
+        path('trips/my-jobs/', driver_views.my_jobs_page, name="driver-my-jobs"),
     ], 'driver'), namespace='driver')),
 ]
 

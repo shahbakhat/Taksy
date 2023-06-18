@@ -67,7 +67,7 @@ function initMap() {
   <div class="row">
     {% for trip in available_trips %}
       <div class="card mb-4 col-4 center job-card" data-pickup-lat="{{ trip.pickup_lat }}" data-pickup-lng="{{ trip.pickup_lng }}" data-dropoff-lat="{{ trip.dropoff_lat }}" data-dropoff-lng="{{ trip.dropoff_lng }}">
-        <h5 class="card-title text-center fw-bold">{{ trip.pickup_datetime|format_pickup_datetime }}</h5>
+        <h5 class="card-title text-center fw-bold">{{ trip.pickup_datetime }}</h5>
         <div class="card-body">
           <div class="map-container" style="height: 200px;"></div> <!-- Display the map inside the card -->
           <p class="card-text mt-4"><strong>From: </strong>{{ trip.pickup_address }}</p>
