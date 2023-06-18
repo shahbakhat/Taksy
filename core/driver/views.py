@@ -19,8 +19,10 @@ def driver_trip_view(request):
 
 @login_required(login_url="/login/?next=/driver/")
 def driver_home_page(request):
-    return render(request, 'driver/driver-home.html',{
-        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY
+    trips_to_views =Taxi.objects.filter(taxi_booking_status=Taxi.TRIP_BOOKED).values()
+    return render(request, 'driver/driver-home.html', {'trips_to_views': trips_to_views},
+                  {
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
     })
 
 

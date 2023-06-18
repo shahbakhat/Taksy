@@ -74,7 +74,12 @@
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="driver/trips-view.html">
+            <a class="page-link" href="{% url 'driver:driver-trip-view'%}">
+                <span class="badge bg-danger rounded-circle">
+                    {% if trips_to_views %}
+                        {{ trips_to_views|length }}
+                    {% endif %}
+                </span> 
                 <i class="fas fa-archive"></i>
             </a>
         </li>
