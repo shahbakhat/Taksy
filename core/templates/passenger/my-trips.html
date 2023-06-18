@@ -57,7 +57,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <form action="{% url 'passenger:cancel-trip' trip.id %}" method="POST">
+              <form action="{% url 'passenger:passenger-cancel-trip' trip.id %}" method="POST">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Cancel Trip</button>
               </form>

@@ -3,7 +3,8 @@ from django .contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from .forms import DriverSignUpForm, PassenegrSignUpForm
+from .forms import PassengerSignUpForm
+from django.contrib import messages
 
 
 
@@ -17,42 +18,33 @@ def driverHome(request):
     return render(request, 'driver/home.html')
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 def sign_up(request):
-    passenger_signup_form = PassenegrSignUpForm()
-    driver_form = DriverSignUpForm()
+    logger.debug("Sign up view accessed")  # Log a debug message
 
-    if request.method == "POST":
-        if 'passenger' in request.POST:
-            form = PassenegrSignUpForm(request.POST)
-            if form.is_valid():
-                email = form.cleaned_data.get('email').lower()
-                user = form.save(commit=False)
-                user.username = email
+    passenger_signup_form = PassengerSignUpForm()
 
-                print("Passenger form data:", form.cleaned_data)  # Print form data for debugging
+    if request.method == 'POST':
+        form = PassengerSignUpForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email').lower()
+            user = form.save(commit=False)
+            user.username = email
 
-                user.save()
-                print("Passenger user saved:", user)  # Print user object for debugging
+            logger.debug("Passenger form data: %s", form.cleaned_data)  # Log form data
 
-                login(request, user)
-                return redirect('/')
-        elif 'driver' in request.POST:
-            form = DriverSignUpForm(request.POST)
-            if form.is_valid():
-                email = form.cleaned_data.get('email').lower()
-                user = form.save(commit=False)
-                user.username = email
+            user.save()
+            logger.debug("Passenger user saved: %s", user)  # Log user object
 
-                print("Driver form data:", form.cleaned_data)  # Print form data for debugging
+            login(request, user)
 
-                user.save()
-                print("Driver user saved:", user)  # Print user object for debugging
+            messages.success(request, "You have successfully signed up as a passenger.")
 
-                login(request, user)
-                return redirect('/')
+            return redirect('passenger:passenger-profile')
 
     return render(request, 'sign-up.html', {
         'passenger_signup_form': passenger_signup_form,
-        'driver_form': driver_form,
     })
-

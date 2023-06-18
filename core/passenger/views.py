@@ -16,6 +16,7 @@ from django.utils.text import slugify
 from .forms import TaxiBookingForm
 from datetime import datetime
 from django.utils.timezone import now
+from .forms import BasicUserForm, BasicCustomerForm
 
 
 
@@ -23,37 +24,38 @@ from django.utils.timezone import now
 
 @login_required(login_url="/login/?next=/passenger/")
 def home(request):
-    return redirect(reverse('passenger:profile'))
+    return redirect(reverse('passenger:passenger-profile'))
+
+
 
 
 @login_required(login_url="/login/?next=/passenger/")
 def profile_page(request):
-    user_form = forms.BasicUserForm(instance=request.user)
-    passenger_form = forms.BasicCustomerForm(instance=request.user.passenger)
+    user_form = BasicUserForm(instance=request.user)
+    passenger_form = BasicCustomerForm(instance=request.user.passenger)
     password_form = PasswordChangeForm(request.user)
 
     if request.method == "POST":
         if request.POST.get('action') == 'update_profile':
-            user_form = forms.BasicUserForm(request.POST, instance=request.user)
-            passenger_form = forms.BasicCustomerForm(request.POST, request.FILES, instance=request.user.passenger)
+            user_form = BasicUserForm(request.POST, instance=request.user)
+            passenger_form = BasicCustomerForm(request.POST, request.FILES, instance=request.user.passenger)
             if user_form.is_valid() and passenger_form.is_valid():
                 user_form.save()
                 passenger_form.save()
 
                 # Profile update toast
                 messages.success(request, 'Profile updated successfully.')
-                return redirect(reverse('passenger:profile'))
+                return redirect(reverse('passenger:passenger-profile'))
 
         elif request.POST.get('action') == 'update_password':
             password_form = PasswordChangeForm(request.user, request.POST)
-            
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)
 
                 # Password update toast
                 messages.success(request, 'Password updated successfully.')
-                return redirect(reverse('passenger:profile'))
+                return redirect(reverse('passenger:passenger-profile'))
 
     return render(request, 'passenger/profile.html', {
         "user_form": user_form,
@@ -114,7 +116,6 @@ def book_taxi_page(request):
                 creating_booking = Taxi(
                     taxi_passenger=current_customer,
                     taxi_passenger_phone_number=phone_number,
-                    taxi_passneger_payment_method=taxi_passenger_payment_method,
                     pickup_address=pickup_address,
                     pickup_lat=pickup_lat,
                     pickup_lng=pickup_lng,

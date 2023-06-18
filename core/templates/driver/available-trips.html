@@ -18,7 +18,7 @@
             },
         });
 
-        fetch("{% url 'driver:available-trips-api' %}")
+        fetch("{% url 'driver:driver-available-trips-api' %}")
             .then(response => response.json())
             .then(json => {
                 if (json.available_trips && json.available_trips.length > 0) {
@@ -70,7 +70,7 @@
 {% block content %}
     <div class="d-flex flex-column h-100" style="padding-bottom: 60px; height: 100vh;">
         <div id="map" style="height: calc(100vh - 60px);"></div>
+        {% include 'driver/bottom_tabs.html' %}
     </div>
-
     {% include 'driver/bottom_tabs.html' %}
 {% endblock %}
