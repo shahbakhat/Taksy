@@ -7,6 +7,18 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="toast align-items-center text-white {% if message.tags %} bg-{{ message.tags }} {% endif %}" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        {{ message }}
+                                    </div>
+                                    <button type="button" class="btn-close ms-auto me-2" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                     {% if not request.GET.next == '/driver/' %}
                         <h4 class="text-center text-uppercase mb-3">
                             <b>Passenger</b>
@@ -15,7 +27,7 @@
                             {% csrf_token %}
                             {% bootstrap_form passenger_signup_form %}
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-block" type="submit">
+                                <button class="btn btn-success btn-block {% if form.is_valid %} is_valid {% endif %}" type="submit">
                                     {% if passenger_signup_form.is_bound and passenger_signup_form.is_valid %}
                                         <i class="bi bi-check-circle-fill"></i> Sign Up
                                     {% else %}
@@ -24,43 +36,17 @@
                                 </button>
                             </div>
                             <p class="text-center mt-3">Already have an account?
-                                <a href="{% url 'login' %}?next={{ request.GET.next }}">Log In</a>
+                                <a href="{% url 'passenger-login' %}?next={{ request.GET.next }}">Log In</a>
                             </p>
+                            <input type="hidden" name="form_type" value="passenger_signup">
                         </form>
-                        {% if messages %}
-                            <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="successModalLabel">Success</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            {% for message in messages %}
-                                                <div class="alert alert-success" role="alert">
-                                                    {{ message }}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <script>
-                                window.onload = function() {
-                                    if ("{{ messages }}" !== "[]") {
-                                        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
-                                        successModal.show();
-                                    }
-                                };
-                            </script>
-                        {% endif %}
                     {% else %}
                         <h4 class="text-center text-uppercase mb-3">
                             <b>Driver</b>
                         </h4>
                         <form method="POST" action="{% url 'sign-up' %}">
                             {% csrf_token %}
-                            {% bootstrap_form driver_form %}
+                            {% bootstrap_form driver_signup_form %}
                             <div class="d-grid gap-2">
                                 <button class="btn btn-success btn-block" type="submit">
                                     {% if driver_form.is_bound and driver_form.is_valid %}
@@ -71,36 +57,10 @@
                                 </button>
                             </div>
                             <p class="text-center mt-3">Already have an account?
-                                <a href="{% url 'login' %}?next={{ request.GET.next }}">Log In</a>
+                                <a href="{% url 'driver-login' %}?next={{ request.GET.next }}">Log In</a>
                             </p>
+                            <input type="hidden" name="form_type" value="driver_signup">
                         </form>
-                        {% if messages %}
-                            <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="errorModalLabel">Error</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            {% for message in messages %}
-                                                <div class="alert alert-danger" role="alert">
-                                                    {{ message }}
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <script>
-                                window.onload = function() {
-                                    if ("{{ messages }}" !== "[]") {
-                                        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                                        errorModal.show();
-                                    }
-                                };
-                            </script>
-                        {% endif %}
                     {% endif %}
                 </div>
             </div>

@@ -47,7 +47,7 @@
 <body>
   <div class="container p-4">
     <hr>
-
+    {% if trips_to_views %}
     <!-- Loop through trips and display as cards -->
     {% for trip in trips_to_views %}
     <div class="card p-0 mb-2">
@@ -69,6 +69,16 @@
     </div>
     
     {% endfor %}
+    {% else %}
+    <div class="card text-center">
+      <div class="card-header">
+        <i class="fa-regular fa-lg fa-face-frown"></i>
+      </div>
+        <div class="card-body">
+          <h1 class="card-title">No Trips</h5>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Custom Modal -->
     <div class="modal fade custom-modal" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel"

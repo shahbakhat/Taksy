@@ -13,10 +13,10 @@
     $('.alert').delay(2000).fadeOut('fast');
 </script> {% endcomment %}
 {% comment %} Path variable aliases {% endcomment %}
-{% url 'passenger:passenger-book-a-taxi' as book_taxi_url %}
-{% url 'passenger:passenger-my-trips' as my_trips_url  %}
-{% url 'passenger:passenger-profile' as profile_url  %}
-{% url 'passenger:passenger-payment-method' as payment_method_url  %}
+{% url 'passenger:book-a-taxi' as book_taxi_url %}
+{% url 'passenger:my-trips' as my_trips_url  %}
+{% url 'passenger:profile' as profile_url  %}
+{% url 'passenger:payment-method' as payment_method_url  %}
 
 <div class="container shadow-lg bg-body-tertiary rounded bg-light mb-4 mt-4 pt-3 pb-3">
     <div class="row">
@@ -28,10 +28,10 @@
             </div>
 
             <div class="list-group mt-5">
-                <a href="{% url 'passenger:passenger-book-a-taxi' %}" class="list-group-item list-group-item-action{% if request.path == book_taxi_url %} active {% endif %}"  >Book a Taxi</a>
-                <a href="{% url 'passenger:passenger-my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}">My Trips</a>
-                <a href="{% url 'passenger:passenger-profile' %}" class="list-group-item list-group-item-action {% if request.path == profile_url %} active {% endif %} ">Profile Information</a>
-                <a href="{% url 'passenger:passenger-payment-method' %}" class="list-group-item list-group-item-action {% if request.path == payment_method_url %} active {% endif %}">Payments Details</a>
+                <a href="{% url 'passenger:book-a-taxi' %}" class="list-group-item list-group-item-action{% if request.path == book_taxi_url %} active {% endif %}"  >Book a Taxi</a>
+                <a href="{% url 'passenger:my-trips' %}"  class="list-group-item list-group-item-action {% if request.path == my_trips_url %} active {% endif %}">My Trips</a>
+                <a href="{% url 'passenger:profile' %}" class="list-group-item list-group-item-action {% if request.path == profile_url %} active {% endif %} ">Profile Information</a>
+                <a href="{% url 'passenger:payment-method' %}" class="list-group-item list-group-item-action {% if request.path == payment_method_url %} active {% endif %}">Payments Details</a>
             </div>
 
             {% if messages %}

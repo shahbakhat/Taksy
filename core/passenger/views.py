@@ -17,35 +17,46 @@ from .forms import TaxiBookingForm
 from datetime import datetime
 from django.utils.timezone import now
 from .forms import BasicUserForm, BasicCustomerForm
+from django.http import HttpResponseRedirect,HttpRequest
+from core.models import TaxiPassenger,TaxiDriver,User
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 
+class CustomLoginView(LoginView):
+    template_name = 'home.html'  # Update with your template name
+    redirect_authenticated_user = True
 
-
-
+User = get_user_model()
 
 @login_required(login_url="/login/?next=/passenger/")
 def home(request):
-    return redirect(reverse('passenger:passenger-profile'))
-
+    if request.user.role == User.Role.TAXIPASSENGER:
+        return redirect('passenger:profile')
+    elif request.user.role == User.Role.TAXIDRIVER:
+        return redirect('driver:profile')
+    else:
+        return render(request, 'profile.html')
 
 
 
 @login_required(login_url="/login/?next=/passenger/")
 def profile_page(request):
     user_form = BasicUserForm(instance=request.user)
-    passenger_form = BasicCustomerForm(instance=request.user.passenger)
+    passenger_form = BasicCustomerForm(instance=request.user)
     password_form = PasswordChangeForm(request.user)
 
     if request.method == "POST":
         if request.POST.get('action') == 'update_profile':
             user_form = BasicUserForm(request.POST, instance=request.user)
-            passenger_form = BasicCustomerForm(request.POST, request.FILES, instance=request.user.passenger)
+            passenger_form = BasicCustomerForm(request.POST, request.FILES, instance=request.user)
             if user_form.is_valid() and passenger_form.is_valid():
                 user_form.save()
                 passenger_form.save()
 
-                # Profile update toast
                 messages.success(request, 'Profile updated successfully.')
-                return redirect(reverse('passenger:passenger-profile'))
+                return redirect(reverse('passenger:profile'))
 
         elif request.POST.get('action') == 'update_password':
             password_form = PasswordChangeForm(request.user, request.POST)
@@ -53,9 +64,8 @@ def profile_page(request):
                 user = password_form.save()
                 update_session_auth_hash(request, user)
 
-                # Password update toast
                 messages.success(request, 'Password updated successfully.')
-                return redirect(reverse('passenger:passenger-profile'))
+                return redirect(reverse('passenger:profile'))
 
     return render(request, 'passenger/profile.html', {
         "user_form": user_form,
@@ -64,18 +74,21 @@ def profile_page(request):
     })
 
 
-# BOOKING TAXI
 
+# BOOKING TAXI
 
 @login_required(login_url="/login/?next=/passenger/")
 def book_taxi_page(request):
-    current_customer = request.user.passenger
+    if not request.user.is_authenticated or not hasattr(request.user, 'passenger'):
+        return HttpResponseRedirect(reverse('passenger-login'))
 
-    if not request.user.passenger.stripe_payment_method_id:
+    passenger = request.user.passenger
+
+    if not passenger.stripe_payment_method_id:
         return redirect(reverse('passenger:payment-method'))
 
-    phone_number = current_customer.phone_number
-    taxi_passenger_payment_method = current_customer.stripe_card_last4
+    phone_number = passenger.phone_number
+    taxi_passenger_payment_method = passenger.stripe_card_last4
 
     if request.method == "POST":
         pickup_form = TaxiBookingForm(request.POST)
@@ -114,7 +127,7 @@ def book_taxi_page(request):
 
                 # Create a new booking instance
                 creating_booking = Taxi(
-                    taxi_passenger=current_customer,
+                    taxi_passenger=passenger.user,
                     taxi_passenger_phone_number=phone_number,
                     pickup_address=pickup_address,
                     pickup_lat=pickup_lat,
@@ -125,19 +138,19 @@ def book_taxi_page(request):
                     trip_distance=distance_km,
                     description=pickup_form.cleaned_data['description'],
                     pickup_datetime=datetime.now(),
-                    taxi_booking_status=Taxi.TRIP_BOOKED  # Set the booking status to 'Booking in progress'
+                    taxi_booking_status=Taxi.TRIP_BOOKED
                 )
 
                 # Generate a unique slug for the taxi based on its attributes
                 base_slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
-                unique_slug = base_slug + '-' + str(now().timestamp()).replace('.', '')
+                unique_slug = base_slug + '-' + str(datetime.now().timestamp()).replace('.', '')
                 creating_booking.slug = unique_slug
 
                 creating_booking.save()
 
                 # Create MyTrips instance
                 my_trip = MyTrips(
-                    booked_passenger=current_customer,
+                    booked_passenger=passenger.user,
                     booked_taxi=creating_booking,
                 )
                 my_trip.save()
@@ -156,7 +169,7 @@ def book_taxi_page(request):
             return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
 
     else:
-        pickup_form = TaxiBookingForm()  # Create a new form instance on reload
+        pickup_form = TaxiBookingForm()
 
     show_trip_details = request.GET.get('show_trip_details') == 'true'
 
@@ -166,6 +179,8 @@ def book_taxi_page(request):
         "show_trip_details": show_trip_details,
         "taxi_passenger_payment_method": taxi_passenger_payment_method,
     })
+
+
 # CANCEL THE TRIP LOGIC
 
 def cancel_trip(request, trip_id):
@@ -206,10 +221,12 @@ def my_trips_page(request):
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required(login_url="/login/?next=/passenger/")
-def payment_method_page(request):  # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if
-    current_customer = request.user.passenger
+def payment_method_page(request):
+    try:
+        current_customer = request.user.passenger
+    except AttributeError:
+        return redirect('passenger-login')
 
-    #remover existing Card
     if request.method == "POST":
         stripe.PaymentMethod.detach(current_customer.stripe_payment_method_id)
         current_customer.stripe_payment_method_id = ""
@@ -217,17 +234,15 @@ def payment_method_page(request):  # sourcery skip: hoist-similar-statement-from
         current_customer.save()
         return redirect(reverse('passenger:payment-method'))
 
-    # stripe customer info
     if not current_customer.stripe_customer_id:
         customer = stripe.Customer.create()
         current_customer.stripe_customer_id = customer['id']
         current_customer.save()
-    #Get the strpe payment method
-    stripe_payment_methods  = stripe.PaymentMethod.list(
-        customer = current_customer.stripe_customer_id,
-        type = "card",
+
+    stripe_payment_methods = stripe.PaymentMethod.list(
+        customer=current_customer.stripe_customer_id,
+        type="card",
     )
-    print (stripe_payment_methods)
 
     if stripe_payment_methods and len(stripe_payment_methods.data) > 0:
         payment_method = stripe_payment_methods.data[0]
@@ -238,16 +253,15 @@ def payment_method_page(request):  # sourcery skip: hoist-similar-statement-from
         current_customer.stripe_payment_method_id = ""
         current_customer.stripe_card_last4 = ""
         current_customer.save()
-    if not current_customer.stripe_payment_method_id:
 
+    if not current_customer.stripe_payment_method_id:
         intent = stripe.SetupIntent.create(
-            customer= current_customer.stripe_customer_id,
-            payment_method_types = ["card"],
-                                            )
-        return render(request, 'passenger/payment-method.html',
-                    {
-                        "client_secret": intent.client_secret,
-                        "STRIPE_API_PUBLIC_KEY": settings.STRIPE_API_PUBLIC_KEY,
-                    },)
+            customer=current_customer.stripe_customer_id,
+            payment_method_types=["card"],
+        )
+        return render(request, 'passenger/payment-method.html', {
+            "client_secret": intent.client_secret,
+            "STRIPE_API_PUBLIC_KEY": settings.STRIPE_API_PUBLIC_KEY,
+        })
     else:
         return render(request, 'passenger/payment-method.html')

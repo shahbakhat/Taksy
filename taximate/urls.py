@@ -6,30 +6,40 @@ from core.passenger import views as passenger_views
 from core.driver import views as driver_views, apis as driver_apis
 from django.conf.urls.static import static
 from django.conf import settings
+from core.views import PassengerLoginView, DriverLoginView,CustomLogoutView
+from core.views import home
+
+
+
+
+
+app_name = 'passenger'
+app_name = 'driver'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home, name="home"),
-    path('login/', auth_views.LoginView.as_view(template_name="login.html"), name="login"),
-    path('logout/', auth_views.LogoutView.as_view(next_page="/"), name="logout"),
+    path('', home, name='home'),
+    path('login/passenger/', PassengerLoginView.as_view(), name="passenger-login"),
+    path('login/driver/', DriverLoginView.as_view(), name="driver-login"),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('sign-up/', views.sign_up, name="sign-up"),
     # Passenegr views
       path('passenger/', include(([
         path('', passenger_views.home, name="passenger-home"),
-        path('profile/', passenger_views.profile_page, name="passenger-profile"),
-        path('payment-method/', passenger_views.payment_method_page, name="passenger-payment-method"),
-        path('book-a-taxi/', passenger_views.book_taxi_page, name="passenger-book-a-taxi"),
-        path('my-trips/', passenger_views.my_trips_page, name="passenger-my-trips"),
-        path('cancel-trip/<uuid:trip_id>/', passenger_views.cancel_trip, name='passenger-cancel-trip'),
+        path('profile/', passenger_views.profile_page, name="profile"),
+        path('payment-method/', passenger_views.payment_method_page, name="payment-method"),
+        path('book-a-taxi/', passenger_views.book_taxi_page, name="book-a-taxi"),
+        path('my-trips/', passenger_views.my_trips_page, name="my-trips"),
+        path('cancel-trip/<uuid:trip_id>/', passenger_views.cancel_trip, name='cancel-trip'),
     ], 'passenger'), namespace='passenger')),
 
     # Driver views
     path('driver/', include(([
         path('', driver_views.home, name="driver-home"),
         path('api/available-trips-api/available/', driver_apis.available_trips_api_page, name="driver-available-trips-api"),
-        path('trips/driver-home-page/', driver_views.driver_home_page, name="driver_home_page"),
-        path('trips/driver/trips-view', driver_views.driver_trip_view, name="driver-trip-view"),
-        path('trips/my-jobs/', driver_views.my_jobs_page, name="driver-my-jobs"),
+        path('trips/driver-home-page/', driver_views.driver_home_page, name="home_page"),
+        path('trips/driver/trips-view', driver_views.driver_trip_view, name="trip-view"),
+        # path('trips/my-trips/', driver_views.my_jobs_page, name="my-trips"),
     ], 'driver'), namespace='driver')),
 ]
 

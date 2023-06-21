@@ -1,20 +1,59 @@
 from django.db import models
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.conf import settings
-from django.db.models import Sum
-from django.shortcuts import reverse
-import uuid
 from django.utils import timezone
-from datetime import datetime, timedelta
+import uuid
+from django.utils.text import slugify
 
+from django.contrib.auth.models import AbstractUser
+
+class User(AbstractUser):
+    class Role(models.TextChoices):
+        ADMIN = "ADMIN", "Admin"
+        TAXIPASSENGER = "TAXIPASSENGER", "Taxi Passenger"
+        TAXIDRIVER = "TAXIDRIVER", "Taxi Driver"
+
+    base_role = "OTHER"
+
+    role = models.CharField(max_length=50, choices=Role.choices, default=base_role)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            if self.role == self.base_role:
+                if self.__class__ == TaxiPassenger:
+                    self.role = self.Role.TAXIPASSENGER
+                elif self.__class__ == TaxiDriver:
+                    self.role = self.Role.TAXIDRIVER
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.get_full_name()} - {self.get_role_display()}"
+
+
+
+class TaxiPassenger(User):
+    base_role = User.Role.TAXIPASSENGER
+
+    def welcome(self):
+        if self.role == User.Role.TAXIDRIVER:
+            return "Welcome to Taksi!"
+        else:
+            return "Access denied. Only Taxi Drivers are allowed."
+
+
+class TaxiDriver(User):
+    base_role = User.Role.TAXIDRIVER
+
+    def welcome(self):
+        if self.role == User.Role.TAXIDRIVER:
+            return "Welcome, Taxi Driver!"
+        else:
+            return "Access denied. Only Taxi Drivers are allowed."
 
 def passenger_image_upload(instance, filename):
     return f'passenger/static/photos/{instance.user.username}/{filename}'
-
-
 class Passenger(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='passenger')
     profile_photo = models.ImageField(upload_to=passenger_image_upload, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True)
     stripe_customer_id = models.CharField(max_length=225, blank=True)
@@ -24,13 +63,10 @@ class Passenger(models.Model):
     def __str__(self):
         return self.user.get_full_name() or str(self.user)
 
-
 def driver_image_upload(instance, filename):
     return f'driver/static/photos/{instance.user.username}/{filename}'
-
-
 class Driver(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='driver')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='driver')
     profile_photo = models.ImageField(upload_to=driver_image_upload, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, default='')
     nta_badge_number = models.CharField(max_length=6, default='N1234')
@@ -43,11 +79,11 @@ class Driver(models.Model):
     spsv_license = models.ImageField(upload_to=driver_image_upload, default='', blank=False, null=False)
     driving_license_number = models.CharField(max_length=200, default='')
     driving_license = models.ImageField(upload_to=driver_image_upload, default='', blank=False, null=False)
-    accepted_trips = models.ManyToManyField('MyTrips', related_name='accepted_drivers', blank=True)
-    cancelled_trips = models.ManyToManyField('MyTrips', related_name='cancelled_drivers', blank=True)
-    current_trips = models.ManyToManyField('MyTrips', related_name='current_drivers', blank=True)
-    completed_trips = models.ManyToManyField('MyTrips', related_name='completed_drivers', blank=True)
-    trips_distance_covered = models.CharField(max_length=255, default='')
+    accepted_trips = models.ManyToManyField('Taxi', related_name='booked', blank=True)
+    cancelled_trips = models.ManyToManyField('Taxi', related_name='cancelled', blank=True)
+    current_trips = models.ManyToManyField('Taxi', related_name='onboard', blank=True)
+    completed_trips = models.ManyToManyField('Taxi', related_name='completed', blank=True)
+    trips_distance_covered = models.ManyToManyField('Taxi',related_name='trips_distance_covered', default='')
     is_verified = models.BooleanField(default=False)
 
     # Verification status
@@ -57,14 +93,15 @@ class Driver(models.Model):
     TRIP_ACCEPTED = 'accepted'
     TRIP_CANCELLED = 'cancelled'
     HAVE_PASSENGER_ONBOARD = 'onboard'
+    COMPLETED_TRIPS = 'completed'
     NO_TRIPS = 'no trips'
     DRIVER_TRIP_STATUS = (
+        (NO_TRIPS , 'No trips'),
         (TRIP_ACCEPTED, 'Trip has been accepted'),
         (TRIP_CANCELLED, 'Trip has been cancelled'),
         (HAVE_PASSENGER_ONBOARD, 'Passenger Onboard'),
         (NO_TRIPS, 'No trips')
     )
-
     # Vehicle types
     IS_ELECTRIC = 'electric'
     IS_HYBRID = 'hybrid'
@@ -85,6 +122,22 @@ class Driver(models.Model):
         return f"{self.user.get_full_name()} - {self.nta_badge_number} - {self.current_trips}"
 
 
+
+def create_passenger_profile(sender, instance, created, **kwargs):
+    if created and instance.role == User.Role.TAXIPASSENGER:
+        Passenger.objects.get_or_create(user=instance)
+
+
+def create_driver_profile(sender, instance, created, **kwargs):
+    if created and instance.role == User.Role.TAXIDRIVER:
+        Driver.objects.get_or_create(user=instance)
+
+
+post_save.connect(create_passenger_profile, sender=TaxiPassenger)
+post_save.connect(create_driver_profile, sender=TaxiDriver)
+
+
+# Taxi model
 class Taxi(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     slug = models.SlugField(max_length=255, unique=True)
@@ -134,22 +187,15 @@ class Taxi(models.Model):
     trip_distance_covered = models.CharField(max_length=255, default='', blank=True)
     booking_time = models.DateTimeField(default=timezone.now)
     cancellation_time = models.DateTimeField(default=timezone.now)
+    slug = models.SlugField(max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.taxi_passenger.user.get_full_name())
+        return super().save(*args, **kwargs)
 
     def __str__(self):
-        today = datetime.now().date()
-        tomorrow = today + timedelta(days=1)
-        yesterday = today - timedelta(days=1)
-
-        if self.pickup_datetime.date() == today:
-            pickup_date = 'Today'
-        elif self.pickup_datetime.date() == tomorrow:
-            pickup_date = 'Tomorrow'
-        elif self.pickup_datetime.date() == yesterday:
-            pickup_date = 'Yesterday'
-        else:
-            pickup_date = self.pickup_datetime.strftime('%Y-%m-%d')
-
-        return f"{self.taxi_passenger.user.get_full_name()}'s Booking is - {self.taxi_booking_status} - From '{pickup_date} {self.pickup_datetime.strftime('%H:%M')}'"
+        return f"{self.taxi_passenger.user.get_full_name()}'s Booking - {self.taxi_booking_status} - From '{self.pickup_datetime.strftime('%Y-%m-%d %H:%M')}'"
 
 
 
@@ -158,4 +204,4 @@ class MyTrips(models.Model):
     booked_taxi = models.ForeignKey(Taxi, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.booked_passenger.user.get_full_name()}'s Booking - {self.booked_taxi}"
+        return f"{self.booked_passenger.user.get_full_name()}'s Booking - {str(self.booked_taxi)}"

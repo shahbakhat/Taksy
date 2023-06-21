@@ -26,9 +26,6 @@ def driver_home_page(request):
     })
 
 
-@login_required(login_url="/drive/login")
-def my_jobs_page(request):
-    available_trips = Taxi.objects.filter(taxi_booking_status=Taxi.TRIP_BOOKED).values()
-    return render(request, 'driver/my-jobs.html', {'available_trips': available_trips}, )
+
 
 

@@ -17,12 +17,12 @@
 
 <body>
       <nav id="navbar-container"  class="navbar  navbar-light{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %}{% if not request.user.is_authenticated %} navbar-expand-xl {% endif %} bg-warning">
-         <a class="navbar-brand fs-4 fw-bolder ms-5" id="nav-logo" {% if request.user.is_authenticated and request.user.passenger %}href="{% url 'passenger:passenger-profile' %}"{% else %}href="#"{% endif %}>Taksi</a>
+         <a class="navbar-brand fs-4 fw-bolder ms-5" id="nav-logo" {% if request.user.is_authenticated and request.user.passenger %}href="{% url 'passenger:profile' %}"{% else %}href="#"{% endif %}>Taksi</a>
         {% if not request.user.is_authenticated %}
         {% else %}
          <form action="form-inline">
             <img src="{% if request.user.passenger.profile_photo %}{{ request.user.passenger.profile_photo.url }}{% else %}{% static 'images/avatar.png'%}{% endif %}" class="rounded-circle me-2" alt="avatar-image" width="50" height="50">
-            <a class="me-4 fw-bold " style="text-decoration:none; color:black;" href="{% url 'passenger:passenger-profile'%}">{{ request.user.get_full_name|title }}</a>
+            <a class="me-4 fw-bold " style="text-decoration:none; color:black;" href="{% url 'passenger:profile'%}">{{ request.user.get_full_name|title }}</a>
             <a href="/logout/" class=" btn me-4 btn-dark">Logout</a>
          </form>
    {% endif %}
