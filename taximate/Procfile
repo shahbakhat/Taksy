@@ -1,1 +1,1 @@
-web: gunicorn JVN.wsgi
+web: gunicorn taximate.wsgi
