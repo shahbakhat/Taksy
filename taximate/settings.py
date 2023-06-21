@@ -10,9 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from pathlib import Path
-import os
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -164,9 +161,10 @@ EMAIL_HOST_PASSWORD = 'famcqpoqnqjmfoya'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
 
-from decouple import Config, Csv
 
-config = Config('.env')
+
+
+config = config('.env')
 
 STRIPE_API_PUBLIC_KEY  = config('STRIPE_API_PUBLIC_KEY' )
 STRIPE_SECRET_KEY  = config('STRIPE_SECRET_KEY' )
