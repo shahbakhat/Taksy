@@ -15,7 +15,7 @@
                      {% csrf_token %}
                      {% bootstrap_form form %}
                      <div class="d-grid gap-2">
-                       <button class="btn btn-warning btn-block" type="submit">Log in</button>
+                       <a class="btn btn-warning btn-block" href="{% url 'passenger:profile'%}" type="submit">Log in</a>
                      </div>
                      <p class="text-center mt-3">New to TaxiPal?
                        <a href="/sign-up/?next=/passenger/"><b>Sign Up</b></a>

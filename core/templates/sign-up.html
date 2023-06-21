@@ -19,7 +19,6 @@
                             </div>
                         {% endfor %}
                     {% endif %}
-                    {% if not request.GET.next == '/driver/' %}
                         <h4 class="text-center text-uppercase mb-3">
                             <b>Passenger</b>
                         </h4>
@@ -36,32 +35,10 @@
                                 </button>
                             </div>
                             <p class="text-center mt-3">Already have an account?
-                                <a href="{% url 'passenger-login' %}?next={{ request.GET.next }}">Log In</a>
+                                <a href="{% url 'passenger:profile' %}?next={{ request.GET.next }}">Log In</a>
                             </p>
                             <input type="hidden" name="form_type" value="passenger_signup">
                         </form>
-                    {% else %}
-                        <h4 class="text-center text-uppercase mb-3">
-                            <b>Driver</b>
-                        </h4>
-                        <form method="POST" action="{% url 'sign-up' %}">
-                            {% csrf_token %}
-                            {% bootstrap_form driver_signup_form %}
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-block" type="submit">
-                                    {% if driver_form.is_bound and driver_form.is_valid %}
-                                        <i class="bi bi-check-circle-fill"></i> Sign Up
-                                    {% else %}
-                                        <i class="bi bi-emoji-frown-fill"></i> Sign Up
-                                    {% endif %}
-                                </button>
-                            </div>
-                            <p class="text-center mt-3">Already have an account?
-                                <a href="{% url 'driver-login' %}?next={{ request.GET.next }}">Log In</a>
-                            </p>
-                            <input type="hidden" name="form_type" value="driver_signup">
-                        </form>
-                    {% endif %}
                 </div>
             </div>
         </div>

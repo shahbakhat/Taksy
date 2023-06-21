@@ -3,6 +3,7 @@ beautifulsoup4==4.12.2
 certifi==2023.5.7
 cffi==1.15.1
 charset-normalizer==3.1.0
+confusable-homoglyphs==3.2.0
 cryptography==40.0.2
 defusedxml==0.7.1
 Django==4.2.1
@@ -16,6 +17,8 @@ django-crispy-forms==2.0
 django-datetimepicker==3.14
 django-jquery==3.1.0
 django-recaptcha==3.0.0
+django-registration==3.3
+django-registration-redux==2.12
 django-tempus-dominus==5.1.2.17
 fontawesomefree==6.4.0
 googlemaps==4.10.0
@@ -26,6 +29,7 @@ Pillow==9.5.0
 pycparser==2.21
 pydantic==1.10.9
 PyJWT==2.7.0
+python-decouple==3.8
 python3-openid==3.2.0
 pytz==2023.3
 requests==2.30.0

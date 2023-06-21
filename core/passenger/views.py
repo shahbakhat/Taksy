@@ -19,10 +19,10 @@ from django.utils.timezone import now
 from .forms import BasicUserForm, BasicCustomerForm
 from django.http import HttpResponseRedirect,HttpRequest
 from core.models import TaxiPassenger,TaxiDriver,User
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
+from core.models import TaxiPassenger
 
 class CustomLoginView(LoginView):
     template_name = 'home.html'  # Update with your template name
@@ -30,14 +30,8 @@ class CustomLoginView(LoginView):
 
 User = get_user_model()
 
-@login_required(login_url="/login/?next=/passenger/")
 def home(request):
-    if request.user.role == User.Role.TAXIPASSENGER:
-        return redirect('passenger:profile')
-    elif request.user.role == User.Role.TAXIDRIVER:
-        return redirect('driver:profile')
-    else:
-        return render(request, 'profile.html')
+    return render(request, "welcome.html")
 
 
 
@@ -78,9 +72,10 @@ def profile_page(request):
 # BOOKING TAXI
 
 @login_required(login_url="/login/?next=/passenger/")
+
 def book_taxi_page(request):
     if not request.user.is_authenticated or not hasattr(request.user, 'passenger'):
-        return HttpResponseRedirect(reverse('passenger-login'))
+        return HttpResponseRedirect(reverse('login'))
 
     passenger = request.user.passenger
 
@@ -127,7 +122,7 @@ def book_taxi_page(request):
 
                 # Create a new booking instance
                 creating_booking = Taxi(
-                    taxi_passenger=passenger.user,
+                    taxi_passenger=passenger,  # Assign the passenger instance
                     taxi_passenger_phone_number=phone_number,
                     pickup_address=pickup_address,
                     pickup_lat=pickup_lat,
@@ -150,7 +145,7 @@ def book_taxi_page(request):
 
                 # Create MyTrips instance
                 my_trip = MyTrips(
-                    booked_passenger=passenger.user,
+                    booked_passenger=passenger,
                     booked_taxi=creating_booking,
                 )
                 my_trip.save()
@@ -181,6 +176,7 @@ def book_taxi_page(request):
     })
 
 
+
 # CANCEL THE TRIP LOGIC
 
 def cancel_trip(request, trip_id):
@@ -201,8 +197,9 @@ def cancel_trip(request, trip_id):
 #  PASSENGER TRIPS
 @login_required(login_url="/login/?next=/passenger/")
 def my_trips_page(request):
+
     booked_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_BOOKED).order_by('pickup_datetime')
-    canceled_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_CANCELLED).order_by('-cancellation_time')
+    canceled_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_CANCELLED).order_by('cancellation_time')
 
     trips = list(booked_trips) + list(canceled_trips)
 
@@ -225,7 +222,7 @@ def payment_method_page(request):
     try:
         current_customer = request.user.passenger
     except AttributeError:
-        return redirect('passenger-login')
+        return redirect('login')
 
     if request.method == "POST":
         stripe.PaymentMethod.detach(current_customer.stripe_payment_method_id)

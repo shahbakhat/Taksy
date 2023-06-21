@@ -164,6 +164,10 @@ EMAIL_HOST_PASSWORD = 'famcqpoqnqjmfoya'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
 
-STRIPE_API_PUBLIC_KEY = "pk_test_51NAzY8EsGHfqk8451iqCC67T8GcG6tDPK8A66XDilpL5mLpc9ISAm17evseykIO3At4Z44Pcsh0VnLb9JrbDfegN00WWmYU9Dj"
-STRIPE_SECRET_KEY = "sk_test_51NAzY8EsGHfqk845BrulOm6gcsGtekVatYuxp4FGCuRGYz9mUTrw8G40peyhquh2TaE2cS153ekQ2PuQqZAr1F5D008Gm7AdBV"
-GOOGLE_MAPS_API_KEY = "AIzaSyBFCTNphiI-IJWaiJft0bOPUPM7fFRGoKc"
+from decouple import Config, Csv
+
+config = Config('.env')
+
+STRIPE_API_PUBLIC_KEY  = config('STRIPE_API_PUBLIC_KEY' )
+STRIPE_SECRET_KEY  = config('STRIPE_SECRET_KEY' )
+GOOGLE_MAPS_API_KEY  = config('GOOGLE_MAPS_API_KEY' )

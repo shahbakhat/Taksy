@@ -4,7 +4,6 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 from django.utils.text import slugify
-
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
@@ -188,6 +187,9 @@ class Taxi(models.Model):
     booking_time = models.DateTimeField(default=timezone.now)
     cancellation_time = models.DateTimeField(default=timezone.now)
     slug = models.SlugField(max_length=255, unique=True)
+    accepted_by = models.ForeignKey(Driver, on_delete=models.SET_NULL, blank=True, null=True)
+
+
 
     def save(self, *args, **kwargs):
         if not self.slug:
