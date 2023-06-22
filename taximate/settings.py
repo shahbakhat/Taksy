@@ -24,7 +24,7 @@ SECRET_KEY = '!)a(73!s7_-k83_(ts6@39gd3^t0)x)n6*8_p3%q971&mb(3v$'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://taksy-083499a57331.herokuapp.com/']
 
 
 
