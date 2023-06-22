@@ -4,6 +4,7 @@ from core.models import Passenger, Taxi
 from django.forms import DateInput, TimeInput
 
 
+
 class BasicUserForm(forms.ModelForm):
     class Meta:
         model = User

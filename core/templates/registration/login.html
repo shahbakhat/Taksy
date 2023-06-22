@@ -9,9 +9,7 @@
                 <h4 class="text-center text-uppercase mb-3">
                     <b>Passenger</b>
                 </h4>
-                <form method="POST" >
-                  {% csrf_token %}
-                  <form method="post">
+                  <form method="post" action="{% url 'login' %}" >
                      {% csrf_token %}
                      {% bootstrap_form form %}
                      <div class="d-grid gap-2">

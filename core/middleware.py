@@ -1,15 +1,18 @@
 from django.contrib.auth import get_user_model
+from django.contrib import messages
+
+UserModel = get_user_model()
+
 class ProfileMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        UserModel = get_user_model()
-        user_id = request.session.get('user_id')
+        response = self.get_response(request)
 
-        if user_id:
+        if request.user.is_authenticated:
             try:
-                user = UserModel.objects.get(pk=user_id)
+                user = UserModel.objects.get(pk=request.user.id)
                 if not hasattr(user, 'role'):
                     # Handle the case when the user model doesn't have a 'role' attribute
                     pass
@@ -23,10 +26,6 @@ class ProfileMiddleware:
                     pass
             except UserModel.DoesNotExist:
                 # Handle the case when the user is not found
-                pass
-        else:
-            # Handle the case when the user is not authenticated
-            pass
+                messages.error(request, 'User not found.')
 
-        response = self.get_response(request)
         return response

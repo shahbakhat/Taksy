@@ -22,11 +22,8 @@ from core.models import TaxiPassenger,TaxiDriver,User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-from core.models import TaxiPassenger
+from core.models import Passenger
 
-class CustomLoginView(LoginView):
-    template_name = 'home.html'  # Update with your template name
-    redirect_authenticated_user = True
 
 User = get_user_model()
 
@@ -75,108 +72,81 @@ def profile_page(request):
 
 def book_taxi_page(request):
     if not request.user.is_authenticated or not hasattr(request.user, 'passenger'):
-        return HttpResponseRedirect(reverse('login'))
-
-    passenger = request.user.passenger
-
-    if not passenger.stripe_payment_method_id:
-        return redirect(reverse('passenger:payment-method'))
-
-    phone_number = passenger.phone_number
-    taxi_passenger_payment_method = passenger.stripe_card_last4
+        return redirect('login')
 
     if request.method == "POST":
         pickup_form = TaxiBookingForm(request.POST)
-        if request.POST.get('booking-info') == '1':
-            if pickup_form.is_valid():
-                # Validate pickup address
-                gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
-                pickup_address = pickup_form.cleaned_data['pickup_address']
-                pickup_geocode_result = gmaps.geocode(pickup_address)
-                if not pickup_geocode_result:
-                    messages.error(request, "Invalid pickup address. Please enter a valid address.")
-                    return redirect(reverse('passenger:book-a-taxi'))
-                pickup_location = pickup_geocode_result[0]['geometry']['location']
-                pickup_lat = pickup_location['lat']
-                pickup_lng = pickup_location['lng']
+        if pickup_form.is_valid():
+            passenger = request.user.passenger
 
-                # Validate dropoff address
-                dropoff_address = pickup_form.cleaned_data['dropoff_address']
-                dropoff_geocode_result = gmaps.geocode(dropoff_address)
-                if not dropoff_geocode_result:
-                    messages.error(request, "Invalid dropoff address. Please enter a valid address.")
-                    return redirect(reverse('passenger:book-a-taxi'))
-                dropoff_location = dropoff_geocode_result[0]['geometry']['location']
-                dropoff_lat = dropoff_location['lat']
-                dropoff_lng = dropoff_location['lng']
+            # Validate pickup address
+            gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+            pickup_address = pickup_form.cleaned_data['pickup_address']
+            pickup_geocode_result = gmaps.geocode(pickup_address)
+            if not pickup_geocode_result:
+                messages.error(request, "Invalid pickup address. Please enter a valid address.")
+                return redirect(reverse('passenger:book-a-taxi'))
+            pickup_location = pickup_geocode_result[0]['geometry']['location']
+            pickup_lat = pickup_location['lat']
+            pickup_lng = pickup_location['lng']
 
-                # Calculate the distance using Google Maps Distance Matrix API
-                origins = f"{pickup_lat},{pickup_lng}"
-                destinations = f"{dropoff_lat},{dropoff_lng}"
-                result = gmaps.distance_matrix(origins, destinations, mode='driving')
+            # Validate dropoff address
+            dropoff_address = pickup_form.cleaned_data['dropoff_address']
+            dropoff_geocode_result = gmaps.geocode(dropoff_address)
+            if not dropoff_geocode_result:
+                messages.error(request, "Invalid dropoff address. Please enter a valid address.")
+                return redirect(reverse('passenger:book-a-taxi'))
+            dropoff_location = dropoff_geocode_result[0]['geometry']['location']
+            dropoff_lat = dropoff_location['lat']
+            dropoff_lng = dropoff_location['lng']
 
-                # Extract the distance value from the API response
-                distance = result['rows'][0]['elements'][0]['distance']['value']
-                # Convert distance to kilometers (optional)
-                distance_km = distance / 1000
+            # Calculate the distance using Google Maps Distance Matrix API
+            origins = f"{pickup_lat},{pickup_lng}"
+            destinations = f"{dropoff_lat},{dropoff_lng}"
+            result = gmaps.distance_matrix(origins, destinations, mode='driving')
 
-                # Create a new booking instance
-                creating_booking = Taxi(
-                    taxi_passenger=passenger,  # Assign the passenger instance
-                    taxi_passenger_phone_number=phone_number,
-                    pickup_address=pickup_address,
-                    pickup_lat=pickup_lat,
-                    pickup_lng=pickup_lng,
-                    dropoff_address=dropoff_address,
-                    dropoff_lat=dropoff_lat,
-                    dropoff_lng=dropoff_lng,
-                    trip_distance=distance_km,
-                    description=pickup_form.cleaned_data['description'],
-                    pickup_datetime=datetime.now(),
-                    taxi_booking_status=Taxi.TRIP_BOOKED
-                )
+            # Extract the distance value from the API response
+            distance = result['rows'][0]['elements'][0]['distance']['value']
+            # Convert distance to kilometers (optional)
+            distance_km = distance / 1000
 
-                # Generate a unique slug for the taxi based on its attributes
-                base_slug = slugify(f"{creating_booking.taxi_passenger}-{creating_booking.pickup_address}-{creating_booking.dropoff_address}")
-                unique_slug = base_slug + '-' + str(datetime.now().timestamp()).replace('.', '')
-                creating_booking.slug = unique_slug
+            # Create a new booking instance
+            taxi_booking = Taxi(
+                taxi_passenger=passenger,
+                pickup_address=pickup_address,
+                pickup_lat=pickup_lat,
+                pickup_lng=pickup_lng,
+                dropoff_address=dropoff_address,
+                dropoff_lat=dropoff_lat,
+                dropoff_lng=dropoff_lng,
+                trip_distance=distance_km,
+                pickup_datetime=datetime.now(),
+                taxi_booking_status=Taxi.TRIP_BOOKED
+            )
+            taxi_booking.save()
 
-                creating_booking.save()
+            # Create MyTrips instance
+            my_trip = MyTrips(
+                booked_passenger=passenger,
+                booked_taxi=taxi_booking,
+            )
+            my_trip.save()
 
-                # Create MyTrips instance
-                my_trip = MyTrips(
-                    booked_passenger=passenger,
-                    booked_taxi=creating_booking,
-                )
-                my_trip.save()
+            # Add success message
+            messages.success(request, "Booking created successfully!")
 
-                # Add success message
-                messages.success(request, "Booking created successfully!")
-
-                return redirect(reverse('passenger:my-trips'))
-            else:
-                # Add error messages for form fields with invalid data
-                for field, errors in pickup_form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"Invalid {field}: {error}")
-
-        elif request.POST.get('confirm-booking') == '2':
-            return redirect(reverse('passenger:book-a-taxi') + '?show_trip_details=true')
-
+            return redirect(reverse('passenger:my-trips'))
+        else:
+            # Add error messages for form fields with invalid data
+            for field, errors in pickup_form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Invalid {field}: {error}")
     else:
         pickup_form = TaxiBookingForm()
 
-    show_trip_details = request.GET.get('show_trip_details') == 'true'
-
     return render(request, 'passenger/book-a-taxi.html', {
         "pickup_form": pickup_form,
-        "phone_number": phone_number,
-        "show_trip_details": show_trip_details,
-        "taxi_passenger_payment_method": taxi_passenger_payment_method,
     })
-
-
-
 # CANCEL THE TRIP LOGIC
 
 def cancel_trip(request, trip_id):
@@ -215,50 +185,51 @@ def my_trips_page(request):
 
 
 #Payment Method
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required(login_url="/login/?next=/passenger/")
+
 def payment_method_page(request):
     try:
-        current_customer = request.user.passenger
+        passenger = request.user.passenger
     except AttributeError:
         return redirect('login')
 
-    if request.method == "POST":
-        stripe.PaymentMethod.detach(current_customer.stripe_payment_method_id)
-        current_customer.stripe_payment_method_id = ""
-        current_customer.stripe_card_last4 = ""
-        current_customer.save()
-        return redirect(reverse('passenger:payment-method'))
+    if request.method == 'POST':
+        stripe.PaymentMethod.detach(passenger.stripe_payment_method_id)
+        passenger.stripe_payment_method_id = ''
+        passenger.stripe_card_last4 = ''
+        passenger.save()
+        return redirect('passenger:payment-method')
 
-    if not current_customer.stripe_customer_id:
+    if not passenger.stripe_customer_id:
         customer = stripe.Customer.create()
-        current_customer.stripe_customer_id = customer['id']
-        current_customer.save()
+        passenger.stripe_customer_id = customer['id']
+        passenger.save()
 
     stripe_payment_methods = stripe.PaymentMethod.list(
-        customer=current_customer.stripe_customer_id,
-        type="card",
+        customer=passenger.stripe_customer_id,
+        type='card',
     )
 
     if stripe_payment_methods and len(stripe_payment_methods.data) > 0:
         payment_method = stripe_payment_methods.data[0]
-        current_customer.stripe_payment_method_id = payment_method.id
-        current_customer.stripe_card_last4 = payment_method.card.last4
-        current_customer.save()
+        passenger.stripe_payment_method_id = payment_method.id
+        passenger.stripe_card_last4 = payment_method.card.last4
+        passenger.save()
     else:
-        current_customer.stripe_payment_method_id = ""
-        current_customer.stripe_card_last4 = ""
-        current_customer.save()
+        passenger.stripe_payment_method_id = ''
+        passenger.stripe_card_last4 = ''
+        passenger.save()
 
-    if not current_customer.stripe_payment_method_id:
-        intent = stripe.SetupIntent.create(
-            customer=current_customer.stripe_customer_id,
-            payment_method_types=["card"],
-        )
-        return render(request, 'passenger/payment-method.html', {
-            "client_secret": intent.client_secret,
-            "STRIPE_API_PUBLIC_KEY": settings.STRIPE_API_PUBLIC_KEY,
-        })
-    else:
-        return render(request, 'passenger/payment-method.html')
+    client_secret = stripe.SetupIntent.create(
+        customer=passenger.stripe_customer_id,
+        payment_method_types=['card'],
+    ).client_secret
+
+    return render(request, 'passenger/payment-method.html', {
+        'passenger': passenger,
+        'client_secret': client_secret,
+        'STRIPE_API_PUBLIC_KEY': settings.STRIPE_API_PUBLIC_KEY,
+    })

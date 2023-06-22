@@ -3,53 +3,56 @@ from .models import User,TaxiPassenger,TaxiDriver,Driver,Passenger
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from .forms import PassengerSignUpForm
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from . import forms
 from django.contrib.auth import get_user_model, logout ,authenticate, login
 from django.db import transaction
 from django.urls import reverse
+from .forms import PassengerSignUpForm
+from .models import Passenger
 
+
+
+def home(request):
+    return render(request, 'welcome.html')
 
 
 User = get_user_model()
 
 
 
-def home(request):
-        return render(request, 'welcome.html')
-
 
 def sign_up(request):
-    passenger_signup_form = forms.PassengerSignUpForm()
+    passenger_signup_form = PassengerSignUpForm()
 
     if request.method == 'POST':
-        form = forms.PassengerSignUpForm(request.POST)
+        form = PassengerSignUpForm(request.POST)
 
         if form.is_valid():
-            user = get_user_model().objects.create_user(
+            user = User.objects.create_user(
                 email=form.cleaned_data['email'],
                 username=form.cleaned_data['email'],  # Use the email as the username
                 password=form.cleaned_data['password'],
                 first_name=form.cleaned_data['first_name'],
                 last_name=form.cleaned_data['last_name'],
-                role=get_user_model().Role.TAXIPASSENGER
+                role=User.Role.TAXIPASSENGER
             )
 
             passenger = Passenger(user=user)
             # Update passenger fields here
             passenger.save()
 
+            # Authenticate and log in the user
+            user = authenticate(request, username=user.email, password=form.cleaned_data['password'])
+            login(request, user)
+
             messages.success(request, "You have successfully signed up as a passenger.")
-            return redirect('login')
+            return redirect('home')  # Replace 'home' with the desired URL after login
 
     return render(request, 'sign-up.html', {
         'passenger_signup_form': passenger_signup_form,
     })
-
-
-
 
 
 

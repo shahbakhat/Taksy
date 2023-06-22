@@ -19,26 +19,26 @@
                             </div>
                         {% endfor %}
                     {% endif %}
-                        <h4 class="text-center text-uppercase mb-3">
-                            <b>Passenger</b>
-                        </h4>
-                        <form method="POST" action="{% url 'sign-up' %}">
-                            {% csrf_token %}
-                            {% bootstrap_form passenger_signup_form %}
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-success btn-block {% if form.is_valid %} is_valid {% endif %}" type="submit">
-                                    {% if passenger_signup_form.is_bound and passenger_signup_form.is_valid %}
-                                        <i class="bi bi-check-circle-fill"></i> Sign Up
-                                    {% else %}
-                                        <i class="bi bi-emoji-frown-fill"></i> Sign Up
-                                    {% endif %}
-                                </button>
-                            </div>
-                            <p class="text-center mt-3">Already have an account?
-                                <a href="{% url 'passenger:profile' %}?next={{ request.GET.next }}">Log In</a>
-                            </p>
-                            <input type="hidden" name="form_type" value="passenger_signup">
-                        </form>
+                    <h4 class="text-center text-uppercase mb-3">
+                        <b>Passenger</b>
+                    </h4>
+                    <form method="POST" action="{% url 'sign-up' %}">
+                        {% csrf_token %}
+                        {% bootstrap_form passenger_signup_form %}
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-block {% if passenger_signup_form.is_valid %} is_valid {% endif %}" type="submit">
+                                {% if passenger_signup_form.is_bound and passenger_signup_form.is_valid %}
+                                    <i class="bi bi-check-circle-fill"></i> Sign Up
+                                {% else %}
+                                    <i class="bi bi-emoji-frown-fill"></i> Sign Up
+                                {% endif %}
+                            </button>
+                        </div>
+                        <p class="text-center mt-3">Already have an account?
+                            <a href="{% url 'passenger:profile' %}?next={{ request.GET.next }}">Log In</a>
+                        </p>
+                        <input type="hidden" name="form_type" value="passenger_signup">
+                    </form>
                 </div>
             </div>
         </div>

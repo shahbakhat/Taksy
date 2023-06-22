@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import json
+import os
+from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -24,7 +25,6 @@ SECRET_KEY = '!)a(73!s7_-k83_(ts6@39gd3^t0)x)n6*8_p3%q971&mb(3v$'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -43,9 +43,7 @@ INSTALLED_APPS = [
     'datetimepicker',
     'tempus_dominus',
     'bootstrap_datepicker_plus',
-  ]
-
-
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,13 +56,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 ROOT_URLCONF = 'taximate.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR /'templates',os.path.join(BASE_DIR, 'templates'),],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,13 +71,17 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
-
             ],
         },
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 WSGI_APPLICATION = 'taximate.wsgi.application'
+
 
 
 # Database
@@ -91,13 +92,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'taksy.sqlite3'),
     },
-    'sqlite3': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'sqlite3.db'),
-    }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -117,7 +112,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
@@ -131,7 +125,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
@@ -141,19 +134,14 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-
-
 AUTH_USER_MODEL = 'core.User'
 
+# URL Configuration
+LOGIN_REDIRECT_URL = 'passenger:profile'
+LOGIN_URL = 'login'
 
-# For Media Upload
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/'
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
 EMAIL_HOST_USER = 'curiousone0008@gmail.com'
@@ -161,11 +149,19 @@ EMAIL_HOST_PASSWORD = 'famcqpoqnqjmfoya'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
 
+# Read the JSON file
+def get_config():
+    with open(os.path.join(BASE_DIR, 'secrets.json')) as config_file:
+        return json.load(config_file)
+
+config = get_config()
+
+STRIPE_API_PUBLIC_KEY = config['STRIPE_API_PUBLIC_KEY']
+STRIPE_SECRET_KEY = config['STRIPE_SECRET_KEY']
+GOOGLE_MAPS_API_KEY = config['GOOGLE_MAPS_API_KEY']
+# Other settings...
 
 
-
-config = config('.env')
-
-STRIPE_API_PUBLIC_KEY  = config('STRIPE_API_PUBLIC_KEY' )
-STRIPE_SECRET_KEY  = config('STRIPE_SECRET_KEY' )
-GOOGLE_MAPS_API_KEY  = config('GOOGLE_MAPS_API_KEY' )
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # or 'django.contrib.sessions.backends.cache' or other backends
+SESSION_COOKIE_AGE = 86400  # Session expiration time in seconds (e.g., 86400 seconds = 24 hours)
+SESSION_COOKIE_SECURE = True  # Set it to True if using HTTPS/SSL

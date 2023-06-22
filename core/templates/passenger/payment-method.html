@@ -2,105 +2,99 @@
 {% load bootstrap5 %}
 
 {% block head %}
-<link rel="stylesheet" href="checkout.css" />
 <script src="https://js.stripe.com/v3/"></script>
-  <style>
-        #setup-form{
-                padding:2rem;
-            }
-            #card-element {
-                height:auto;
-                padding:10px 12px;
-                width:100%;
-                background-color=white;
-                border :1px solid #ced4da;
-                {% comment %} border:1px solid transparent; {% endcomment %}
-                border-radius:4px;
+<style>
+    #setup-form {
+        padding: 2rem;
+    }
 
-                {% comment %} box-shadow: 01px 3px 0 #e6ebf1;
-                -webkit-trnsition: box-shadow 150ms ease;
-                transition: box-shadow 150ms ease; {% endcomment %}
-            }
-            #card-element--focus {
-                border-color:#80bdff;
-                box-shadow:0 0 0 0.2rem rgba(0,123,255,.25);
-            }
-            #card-element--invalid{
-                border-color: #fa755a;
+    #card-element {
+        height: auto;
+        padding: 10px 12px;
+        width: 100%;
+        background-color: white;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
 
-            }
-            #card-element--webkit-autofil {
-                background-color:#fefde5 !important;
-            }
+    #card-element--focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+
+    #card-element--invalid {
+        border-color: #fa755a;
+    }
+
+    #card-element--webkit-autofil {
+        background-color: #fefde5 !important;
+    }
 </style>
-
 {% endblock %}
+
 {% block main %}
-{% if not request.user.passenger.stripe_payment_method_id%}
-<div class="alert alert-danger alert-dismissible fade  show " role="alert">
- Let's add your Card first, to <strong>Book a Taxi</strong>
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+{% if not request.user.passenger.stripe_payment_method_id %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    Let's add your Card first, to <strong>Book a Taxi</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endif %}
 
-<b class="text-secomdary">Your Credit/Debit Card</b>
-    <div class="card bg-white mt-3 ">
-       <div class="card-body">
+<b class="text-secondary">Your Credit/Debit Card</b>
+<div class="card bg-white mt-3">
+    <div class="card-body">
 
         {% if request.user.passenger.stripe_payment_method_id %}
         <div id="change-card" class="input-group">
-          <input type="text" class="form-control"
-          disabled value=" **** **** **** {{ request.user.passenger.stripe_card_last4 }}">
-          <div class="input-group-append">
-            <form  method="POST">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-danger" >Remove</button>
-            </form>
-          </div>
+            <input type="text" class="form-control" disabled
+                value=" **** **** **** {{ request.user.passenger.stripe_card_last4 }}">
+            <div class="input-group-append">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </form>
+            </div>
         </div>
 
         {% else %}
-        <form id="steup-form" data-secret="{{ client_secret }}">
-          <div id="card-element">
-            <!-- Elements will create form elements here -->
-          </div>
-          <button id="card-button" type="button" class= "btn btn-warning mt-3">Save Card</button>
+        <form id="setup-form" data-secret="{{ client_secret }}">
+            <div id="card-element">
+                <!-- Elements will create form elements here -->
+            </div>
+            <button id="card-button" type="button" class="btn btn-warning mt-3">Save Card</button>
         </form>
         {% endif %}
-       </div>
-
     </div>
-  {% if not request.user.passenger.stripe_payment_method_id %}
+</div>
+
+{% if not request.user.passenger.stripe_payment_method_id %}
 <script>
-var stripe = Stripe("{{STRIPE_API_PUBLIC_KEY}}");
+    var stripe = Stripe("{{STRIPE_API_PUBLIC_KEY}}");
 
-var elements = stripe.elements();
-var cardElement = elements.create('card')
-cardElement.mount('#card-element')
+    var elements = stripe.elements();
+    var cardElement = elements.create('card');
+    cardElement.mount('#card-element');
 
-var cardholerName = document.getElementById('cardholer-name');
-var cardButton = document.getElementById('card-button');
-var clientSecret = "{{ client_secret }}";
+    var cardButton = document.getElementById('card-button');
+    var clientSecret = "{{ client_secret }}";
 
-cardButton.addEventListener('click', function(ev){
-  stripe.confirmCardSetup(
-    clientSecret,
-    {
-      payment_method : {
-        card : cardElement,
-      },
-    }
-  ).then(function(result)
-
-  {
-    window.location.reload();
-    if (result.error){
-      toast(result.error.message, 'error');
-    } else {
-      toast(result.message, 'success');
-  }
-});
-});
+    cardButton.addEventListener('click', function (ev) {
+        stripe.confirmCardSetup(
+            clientSecret,
+            {
+                payment_method: {
+                    card: cardElement,
+                },
+            }
+        ).then(function (result) {
+            if (result.error) {
+                toast(result.error.message, 'error');
+            } else {
+                toast(result.message, 'success');
+                location.reload(); // Reload the page after saving the card
+            }
+        });
+    });
 </script>
 {% endif %}
 {% endblock %}
