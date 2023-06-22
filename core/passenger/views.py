@@ -22,7 +22,9 @@ from core.models import TaxiPassenger,TaxiDriver,User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-from core.models import Passenger
+from core.models import Passenger, TaxiDriver
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 User = get_user_model()
@@ -166,21 +168,25 @@ def cancel_trip(request, trip_id):
 
 #  PASSENGER TRIPS
 @login_required(login_url="/login/?next=/passenger/")
+
 def my_trips_page(request):
+    try:
+        passenger = request.user.passenger
+        booked_trips = Taxi.objects.filter(taxi_passenger=passenger, taxi_booking_status=Taxi.TRIP_BOOKED).order_by('pickup_datetime')
+        canceled_trips = Taxi.objects.filter(taxi_passenger=passenger, taxi_booking_status=Taxi.TRIP_CANCELLED).order_by('cancellation_time')
 
-    booked_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_BOOKED).order_by('pickup_datetime')
-    canceled_trips = Taxi.objects.filter(taxi_passenger=request.user.passenger, taxi_booking_status=Taxi.TRIP_CANCELLED).order_by('cancellation_time')
+        trips = list(booked_trips) + list(canceled_trips)
 
-    trips = list(booked_trips) + list(canceled_trips)
+        context = {
+            'trips': trips,
+        }
 
-    context = {
-        'trips': trips,
-    }
+        return render(request, 'passenger/my-trips.html', context)
 
-    if not trips:
-        context['no_trips'] = True
-
-    return render(request, 'passenger/my-trips.html', context)
+    except ObjectDoesNotExist:
+        # Handle the case when the user does not have a related passenger object
+        # You can adjust this part to fit your desired behavior or redirect the user to an appropriate page
+        return render(request, 'passenger/my-trips.html', {'no_passenger': True})
 
 
 
