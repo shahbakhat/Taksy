@@ -1,6 +1,4 @@
-Sure! Here's the converted code in Markdown format:
 
-```markdown
 
 ## Taksy
 Taksy app is a Taxi booking system hwere Passeneger can book a taxi in advance and have peace of mind.
