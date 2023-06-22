@@ -52,7 +52,7 @@ class TaxiDriver(User):
 def passenger_image_upload(instance, filename):
     return f'passenger/static/photos/{instance.user.username}/{filename}'
 class Passenger(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='passenger')
+    user = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True, related_name='passenger')
     profile_photo = models.ImageField(upload_to=passenger_image_upload, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True)
     stripe_customer_id = models.CharField(max_length=225, blank=True)
@@ -65,7 +65,7 @@ class Passenger(models.Model):
 def driver_image_upload(instance, filename):
     return f'driver/static/photos/{instance.user.username}/{filename}'
 class Driver(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='driver')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True,related_name='driver')
     profile_photo = models.ImageField(upload_to=driver_image_upload, blank=True, null=True)
     phone_number = models.CharField(max_length=50, blank=True, default='')
     nta_badge_number = models.CharField(max_length=6, default='N1234')
@@ -80,7 +80,6 @@ class Driver(models.Model):
     driving_license = models.ImageField(upload_to=driver_image_upload, default='', blank=False, null=False)
     accepted_trips = models.ManyToManyField('Taxi', related_name='booked', blank=True)
     cancelled_trips = models.ManyToManyField('Taxi', related_name='cancelled', blank=True)
-    current_trips = models.ManyToManyField('Taxi', related_name='onboard', blank=True)
     completed_trips = models.ManyToManyField('Taxi', related_name='completed', blank=True)
     trips_distance_covered = models.ManyToManyField('Taxi',related_name='trips_distance_covered', default='')
     is_verified = models.BooleanField(default=False)
