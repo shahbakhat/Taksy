@@ -25,6 +25,9 @@ SECRET_KEY = '!)a(73!s7_-k83_(ts6@39gd3^t0)x)n6*8_p3%q971&mb(3v$'
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CORS_ALLOWED_ORIGINS = [
+    "https://taksy-083499a57331.herokuapp.com",
+]
 
 
 
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'datetimepicker',
     'tempus_dominus',
     'bootstrap_datepicker_plus',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'taximate.urls'
