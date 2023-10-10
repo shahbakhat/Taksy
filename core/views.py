@@ -48,7 +48,7 @@ def sign_up(request):
             login(request, user)
 
             messages.success(request, "You have successfully signed up as a passenger.")
-            return redirect('home')  # Replace 'home' with the desired URL after login
+            return redirect('passenger:book-a-taxi')  # Replace 'home' with the desired URL after login
 
     return render(request, 'sign-up.html', {
         'passenger_signup_form': passenger_signup_form,
