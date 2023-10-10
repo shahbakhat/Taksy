@@ -13,13 +13,18 @@ import json
 import os
 from pathlib import Path
 
+
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '!)a(73!s7_-k83_(ts6@39gd3^t0)x)n6*8_p3%q971&mb(3v$'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
