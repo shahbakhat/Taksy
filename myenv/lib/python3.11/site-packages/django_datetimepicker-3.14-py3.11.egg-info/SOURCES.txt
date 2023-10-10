@@ -1,0 +1,14 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.cfg
+setup.py
+datetimepicker/__init__.py
+datetimepicker/helpers.py
+datetimepicker/urls.py
+datetimepicker/views.py
+datetimepicker/widgets.py
+django_datetimepicker.egg-info/PKG-INFO
+django_datetimepicker.egg-info/SOURCES.txt
+django_datetimepicker.egg-info/dependency_links.txt
+django_datetimepicker.egg-info/top_level.txt

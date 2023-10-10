@@ -1,7 +1,5 @@
-*.log
-*.pot
 *.pyc
-__pycache__
+__pycache__/
+.DS_Store
 media
-secrets.json
-myenv/
+secret.json
