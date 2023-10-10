@@ -161,7 +161,7 @@ DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
 
 # Read the JSON file
 def get_config():
-    with open(os.path.join(BASE_DIR, 'secrets.json')) as config_file:
+    with open(os.path.join(BASE_DIR, 'secret.json')) as config_file:
         return json.load(config_file)
 
 config = get_config()
