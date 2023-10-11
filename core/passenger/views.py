@@ -37,13 +37,13 @@ def home(request):
 @login_required(login_url="/login/?next=/passenger/")
 def profile_page(request):
     user_form = BasicUserForm(instance=request.user)
-    passenger_form = BasicCustomerForm(instance=request.user)
+    passenger_form = BasicCustomerForm(instance=request.user.passenger)
     password_form = PasswordChangeForm(request.user)
 
     if request.method == "POST":
         if request.POST.get('action') == 'update_profile':
             user_form = BasicUserForm(request.POST, instance=request.user)
-            passenger_form = BasicCustomerForm(request.POST, request.FILES, instance=request.user)
+            passenger_form = BasicCustomerForm(request.POST, request.FILES, instance=request.user.passenger)
             if user_form.is_valid() and passenger_form.is_valid():
                 user_form.save()
                 passenger_form.save()
