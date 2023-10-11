@@ -34,7 +34,7 @@ class TaxiPassenger(User):
     base_role = User.Role.TAXIPASSENGER
 
     def welcome(self):
-        if self.role == User.Role.TAXIDRIVER:
+        if self.role == User.Role.TAXIPASSENGER:
             return "Welcome to Taksi!"
         else:
             return "Access denied. Only Taxi Drivers are allowed."
@@ -50,7 +50,8 @@ class TaxiDriver(User):
             return "Access denied. Only Taxi Drivers are allowed."
 
 def passenger_image_upload(instance, filename):
-    return f'passenger/static/photos/{instance.user.username}/{filename}'
+    return f'passenger-photos/{instance.user.username}/{filename}'
+
 class Passenger(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,primary_key=True, related_name='passenger')
     profile_photo = models.ImageField(upload_to=passenger_image_upload, blank=True, null=True)
@@ -63,7 +64,7 @@ class Passenger(models.Model):
         return self.user.get_full_name() or str(self.user)
 
 def driver_image_upload(instance, filename):
-    return f'driver/static/photos/{instance.user.username}/{filename}'
+    return f'core/static/driver-photos/{instance.user.username}/{filename}'
 class Driver(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True,related_name='driver')
     profile_photo = models.ImageField(upload_to=driver_image_upload, blank=True, null=True)
@@ -189,11 +190,16 @@ class Taxi(models.Model):
     accepted_by = models.ForeignKey(Driver, on_delete=models.SET_NULL, blank=True, null=True)
 
 
-
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.taxi_passenger.user.get_full_name())
-        return super().save(*args, **kwargs)
+            base_slug = slugify(self.taxi_passenger.user.get_full_name())
+            unique_slug = base_slug
+            num = 1
+            while Taxi.objects.filter(slug=unique_slug).exists():
+                unique_slug = f"{base_slug}-{num}"
+                num += 1
+            self.slug = unique_slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.taxi_passenger.user.get_full_name()}'s Booking - {self.taxi_booking_status} - From '{self.pickup_datetime.strftime('%Y-%m-%d %H:%M')}'"

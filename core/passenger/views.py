@@ -22,7 +22,7 @@ from core.models import TaxiPassenger,TaxiDriver,User
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
-from core.models import Passenger, TaxiDriver
+from core.models import Passenger
 from django.core.exceptions import ObjectDoesNotExist
 
 

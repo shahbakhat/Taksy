@@ -18,6 +18,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+STATIC_URL = '/static/'
+
+# Full filesystem path to the directory where static files are collected
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Quick-start development settings - unsuitable for production
@@ -141,12 +146,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'taximate/staticfiles',
-]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+STATIC_URL = '/static/'
+
+
 
 
 AUTH_USER_MODEL = 'core.User'
@@ -180,3 +188,5 @@ GOOGLE_MAPS_API_KEY = config['GOOGLE_MAPS_API_KEY']
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # or 'django.contrib.sessions.backends.cache' or other backends
 SESSION_COOKIE_AGE = 86400  # Session expiration time in seconds (e.g., 86400 seconds = 24 hours)
 SESSION_COOKIE_SECURE = True  # Set it to True if using HTTPS/SSL
+
+
