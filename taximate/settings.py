@@ -30,6 +30,10 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesSto
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
+STRIPE_API_PUBLIC_KEY = os.environ.get('STRIPE_API_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -171,18 +175,6 @@ EMAIL_HOST_USER = 'curiousone0008@gmail.com'
 EMAIL_HOST_PASSWORD = 'famcqpoqnqjmfoya'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Taxi Pal <no-reply@taxipal.localhost>'
-
-# Read the JSON file
-def get_config():
-    with open(os.path.join(BASE_DIR, 'secret.json')) as config_file:
-        return json.load(config_file)
-
-config = get_config()
-
-STRIPE_API_PUBLIC_KEY = config['STRIPE_API_PUBLIC_KEY']
-STRIPE_SECRET_KEY = config['STRIPE_SECRET_KEY']
-GOOGLE_MAPS_API_KEY = config['GOOGLE_MAPS_API_KEY']
-# Other settings...
 
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # or 'django.contrib.sessions.backends.cache' or other backends
