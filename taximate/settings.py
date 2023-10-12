@@ -36,7 +36,7 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # settings.py
 CSRF_COOKIE_SECURE = True  # For secure cookies (recommended in production)
 CSRF_COOKIE_HTTPONLY = True  # Recommended for security
