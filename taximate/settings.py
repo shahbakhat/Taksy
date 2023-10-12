@@ -45,8 +45,9 @@ CSRF_COOKIE_HTTPONLY = True  # Recommended for security
 ALLOWED_HOSTS = ["taksy-083499a57331.herokuapp.com/","localhost"]
 # settings.py
 CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOWED_ORIGINS = ["https://taksy-083499a57331.herokuapp.com"]
+CORS_ALLOWED_ORIGINS = [
+    'https://taksy-083499a57331.herokuapp.com',
+]
 
 
 
