@@ -109,6 +109,13 @@
 
 [W3C](https://validator.w3.org/) was used to validate the HTML on all pages of the website. I have checked the HTML via address input and also by inspecting the page source and running this through the validator.
 
+### Pylint
+Pylint was used all the way through the development and errors were fixed during the development and at the end all the Python code was tested and found no issues.
+
+### View Functions
+All the view functions working perfectly without any error and all the associated Urls are in order.
+
+
 * Welcome Page.
 ---
 Encountered many errors in a deployed version where server requests were not going through, then i resolved by adding CORSHEADERS app, and CSRF allowed origins.
@@ -127,6 +134,14 @@ The AUTHENTICATION was a real pain for days to me because it was my first time d
 * Stripe API
 ---
 Stripe API caused me so many errors and had to go through so many Videos on youtube and other sources like artiles. first time using APIs was challenging but after all got it done and made it working perfectly.
+
+* Models
+----
+All data specific to any model in the app is being being stored in the database.
+
+* Taxi Booking
+---
+User is successfully booking the Taxi and successful booking is being saved in my trips and can been seen by admin in admin panel.
 
 
 
