@@ -207,6 +207,7 @@ class Taxi(models.Model):
 
 
 class MyTrips(models.Model):
+    id = models.BigAutoField(primary_key=True)
     booked_passenger = models.ForeignKey(Passenger, on_delete=models.CASCADE)
     booked_taxi = models.ForeignKey(Taxi, on_delete=models.CASCADE)
 
