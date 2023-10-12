@@ -37,8 +37,15 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# settings.py
+CSRF_COOKIE_SECURE = True  # For secure cookies (recommended in production)
+CSRF_COOKIE_HTTPONLY = True  # Recommended for security
+
 
 ALLOWED_HOSTS = ["https://taksy-083499a57331.herokuapp.com/","*"]
+# settings.py
+CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     "https://taksy-083499a57331.herokuapp.com",
 ]
