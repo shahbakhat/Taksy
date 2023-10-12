@@ -38,7 +38,7 @@ GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-RF_TRUSTED_ORIGINS = ['https://taksy-083499a57331.herokuapp.com/login/']
+CSRF_TRUSTED_ORIGINS = ['https://taksy-083499a57331.herokuapp.com/login/']
 
 
 CORS_ALLOWED_ORIGINS = [
